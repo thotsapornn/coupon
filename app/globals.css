@@ -116,7 +116,7 @@ ul, ol {
   width: 100%;
   max-width: var(--max);
   margin: 0 auto;
-  padding: 28px 20px 110px;
+  padding: 28px 20px 48px;
 }
 
 .page-narrow {
@@ -187,25 +187,6 @@ ul, ol {
 }
 
 
-.site-footer {
-  max-width: var(--max);
-  margin: 0 auto;
-  padding: 28px 20px 36px;
-  border-top: 1px solid var(--line);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 18px;
-  align-items: center;
-  justify-content: space-between;
-  color: var(--muted);
-  font-size: 12.5px;
-}
-
-.site-footer a {
-  text-decoration: underline;
-  text-decoration-color: var(--line-strong);
-  text-underline-offset: 3px;
-}
 
 /* ==========================================================================
    Typography helpers
@@ -1947,6 +1928,7 @@ ul, ol {
 
 .modal {
   width: min(100%, 420px);
+  overscroll-behavior: contain;
   background: var(--surface);
   border-radius: 22px;
   padding: 24px;
@@ -2241,7 +2223,7 @@ ul, ol {
 /* เว็บนี้รองรับเฉพาะมือถือ: คงเลย์เอาต์คอลัมน์เดียวแม้เปิดบนจอกว้าง */
 @media (min-width: 900px) {
   .page {
-    padding: 28px 20px 110px;
+    padding: 28px 20px 48px;
   }
 
   .site-header-inner {
@@ -2644,4 +2626,84 @@ ul, ol {
   padding: 0;
   border: 0;
   background: transparent;
+}
+
+/* Compact review preview + full viewer */
+
+.review-preview.is-compact {
+  max-height: 180px;
+}
+
+.review-preview-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+}
+
+.review-preview.is-compact img {
+  max-height: 180px;
+}
+
+.image-viewer {
+  width: min(100%, 720px);
+  overscroll-behavior: contain;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.image-viewer img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+  border-radius: 14px;
+  background: #111;
+}
+
+.image-viewer-actions {
+  align-self: flex-end;
+  display: flex;
+  gap: 8px;
+}
+
+/* Compact coupon image on detail/share pages */
+
+.coupon-image-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: #fff;
+  cursor: zoom-in;
+}
+
+.coupon-image-thumb img {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+}
+
+.coupon-image-hint {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line);
+  font-size: 11.5px;
+  color: var(--ink-soft);
 }

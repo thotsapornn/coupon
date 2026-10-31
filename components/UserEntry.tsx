@@ -26,6 +26,7 @@ export function UserEntry() {
         <label htmlFor="user-id">id ของคุณ</label>
         <input
           id="user-id"
+          name="userId"
           value={value}
           onChange={(event) => {
             setValue(event.target.value);

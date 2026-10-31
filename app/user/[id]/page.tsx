@@ -37,12 +37,6 @@ export default async function UserWalletPage({ params }: PageProps) {
             <PlusIcon size={16} />
             เพิ่มคูปอง
           </Link>
-          <Link href="/user" className="btn btn-secondary">
-            เปลี่ยน id
-          </Link>
-          <Link href="/qr" className="btn btn-ghost">
-            สร้าง QR
-          </Link>
         </div>
       </section>
 

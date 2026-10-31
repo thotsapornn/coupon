@@ -18,19 +18,3 @@ export function SiteHeader() {
     </header>
   );
 }
-
-export function SiteFooter({ mode }: { mode: 'demo' | 'gas' }) {
-  return (
-    <footer className="site-footer">
-      <span>
-        {mode === 'gas'
-          ? 'ข้อมูลเก็บใน Google Sheets · รูปเก็บใน Google Drive'
-          : 'โหมดทดลอง: ข้อมูลเก็บในไฟล์ .data บนเครื่องนี้'}
-      </span>
-      <span>
-        Coupon Wallet · <Link href="/user">กระเป๋า</Link> ·{' '}
-        <a href="/simple.html">โหมดง่าย</a> · <Link href="/baseline">Baseline</Link>
-      </span>
-    </footer>
-  );
-}

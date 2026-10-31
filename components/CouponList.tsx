@@ -73,6 +73,7 @@ export function CouponList({ coupons, addHref }: { coupons: Coupon[]; addHref?: 
           <SearchIcon size={18} />
           <input
             type="search"
+            name="q"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="ค้นหาชื่อร้าน รหัสคูปอง หรือส่วนลด…"

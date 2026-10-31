@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { AdminCouponList } from '@/components/AdminCouponList';
 import { AdminLogin } from '@/components/AdminLogin';
-import { ADMIN_USER_ID, adminConfigured, isAdminRequest } from '@/lib/auth';
-import { listCoupons } from '@/lib/store';
+import { adminConfigured, isAdminRequest } from '@/lib/auth';
+import { listAllCoupons } from '@/lib/store';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +26,7 @@ export default async function AdminPage() {
     return <AdminLogin />;
   }
 
-  const { items } = await listCoupons({ userId: ADMIN_USER_ID, limit: 1000 });
+  const { items } = await listAllCoupons({ limit: 1000 });
 
   return (
     <div className="page page-narrow">

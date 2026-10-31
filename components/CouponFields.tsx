@@ -55,6 +55,7 @@ export function CouponFields({ values, errors, disabled, onChange }: CouponField
         </label>
         <input
           id="coupon-title"
+          name="title"
           value={values.title}
           onChange={(event) => onChange('title', event.target.value)}
           maxLength={100}
@@ -82,6 +83,7 @@ export function CouponFields({ values, errors, disabled, onChange }: CouponField
           </label>
           <input
             id="coupon-merchant"
+            name="merchant"
             value={values.merchant}
             onChange={(event) => onChange('merchant', event.target.value)}
             maxLength={50}
@@ -98,6 +100,7 @@ export function CouponFields({ values, errors, disabled, onChange }: CouponField
           </label>
           <input
             id="coupon-discount"
+            name="discountText"
             value={values.discountText}
             onChange={(event) => onChange('discountText', event.target.value)}
             maxLength={80}
@@ -119,6 +122,7 @@ export function CouponFields({ values, errors, disabled, onChange }: CouponField
           </label>
           <input
             id="coupon-expiry"
+            name="expiryDate"
             type="date"
             value={values.expiryDate}
             onChange={(event) => onChange('expiryDate', event.target.value)}
@@ -138,6 +142,7 @@ export function CouponFields({ values, errors, disabled, onChange }: CouponField
           </label>
           <input
             id="coupon-code"
+            name="couponCode"
             value={values.couponCode}
             onChange={(event) => onChange('couponCode', event.target.value.toUpperCase())}
             maxLength={100}
@@ -160,6 +165,7 @@ export function CouponFields({ values, errors, disabled, onChange }: CouponField
         </label>
         <textarea
           id="coupon-description"
+          name="description"
           value={values.description}
           onChange={(event) => onChange('description', event.target.value)}
           maxLength={100}
@@ -176,6 +182,7 @@ export function CouponFields({ values, errors, disabled, onChange }: CouponField
         </label>
         <textarea
           id="coupon-note"
+          name="note"
           value={values.note}
           onChange={(event) => onChange('note', event.target.value)}
           maxLength={300}
@@ -194,6 +201,7 @@ export function CouponFields({ values, errors, disabled, onChange }: CouponField
           </label>
           <textarea
             id="coupon-qr"
+            name="qrRawValue"
             value={values.qrRawValue}
             onChange={(event) => onChange('qrRawValue', event.target.value)}
             maxLength={2000}

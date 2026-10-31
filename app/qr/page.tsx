@@ -15,7 +15,7 @@ export default async function CreateQrPage({ searchParams }: PageProps) {
   const initialText = (raw ?? '').slice(0, 500);
 
   return (
-    <div className="page page-narrow">
+    <div className="page">
       <TextCodeTool initialText={initialText} />
     </div>
   );

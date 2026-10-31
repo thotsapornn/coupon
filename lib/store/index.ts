@@ -12,6 +12,16 @@ export function listCoupons(options: ListCouponsOptions): Promise<ListResult> {
   return storeMode() === 'gas' ? gas.listCoupons(options) : demo.listCoupons(options);
 }
 
+export function listAllCoupons(
+  options: Omit<ListCouponsOptions, 'userId'>,
+): Promise<ListResult> {
+  return storeMode() === 'gas' ? gas.listAllCoupons(options) : demo.listAllCoupons(options);
+}
+
+export function purgeCouponAny(couponId: string): Promise<void> {
+  return storeMode() === 'gas' ? gas.purgeCouponAny(couponId) : demo.purgeCouponAny(couponId);
+}
+
 export function getSharedCoupon(couponId: string): Promise<Coupon> {
   return storeMode() === 'gas' ? gas.getSharedCoupon(couponId) : demo.getSharedCoupon(couponId);
 }

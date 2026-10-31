@@ -16,15 +16,14 @@ export default async function CouponHistoryPage({ params }: PageProps) {
   const actorId = normalizeUserId(id);
   if (!actorId) nextNotFound();
 
-  let coupon;
-  try {
-    coupon = await getCoupon(couponId, actorId);
-  } catch (error) {
+  // ยิง GAS พร้อมกัน (เดิมยิงทีละตัว ทำให้รอสองรอบ)
+  const [coupon, logs] = await Promise.all([
+    getCoupon(couponId, actorId),
+    listHistory(couponId, actorId),
+  ]).catch((error) => {
     if (error instanceof ApiError && error.code === 'NOT_FOUND') nextNotFound();
     throw error;
-  }
-
-  const logs = await listHistory(couponId, actorId);
+  });
 
   return (
     <div className="page page-narrow">

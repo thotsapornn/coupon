@@ -64,6 +64,7 @@ export function AdminLogin() {
           <label htmlFor="admin-password">รหัสผ่าน</label>
           <input
             id="admin-password"
+            name="password"
             type="password"
             value={password}
             onChange={(event) => {

@@ -142,7 +142,7 @@ export function AdminCouponList({ coupons }: { coupons: Coupon[] }) {
             admintatar
           </span>
           <h1 className="hero-title">จัดการคูปอง</h1>
-          <p className="hero-sub">ลบถาวรได้เฉพาะคูปองของ id admintatar</p>
+          <p className="hero-sub">เห็นคูปองของทุก user · ลบถาวรได้ทุกใบ</p>
         </div>
         <div className="admin-head-actions">
           <Link href="/user/admintatar" className="btn btn-secondary btn-sm">
@@ -194,9 +194,10 @@ export function AdminCouponList({ coupons }: { coupons: Coupon[] }) {
           <SearchIcon size={18} />
           <input
             type="search"
+            name="q"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="ค้นหาชื่อ ร้าน รหัสคูปอง…"
+            placeholder="ค้นหาชื่อ ร้าน รหัส หรือ user id…"
             autoComplete="off"
           />
         </label>
@@ -261,7 +262,8 @@ export function AdminCouponList({ coupons }: { coupons: Coupon[] }) {
                 <div className="admin-info">
                   <strong className="admin-title">{coupon.title}</strong>
                   <span className="small muted">
-                    {coupon.couponId} · {STATUS_LABEL[getDisplayStatus(coupon)] ?? coupon.status}
+                    @{coupon.userId} · {coupon.couponId} ·{' '}
+                    {STATUS_LABEL[getDisplayStatus(coupon)] ?? coupon.status}
                   </span>
                   <span className="small muted">
                     {coupon.merchant ? `${coupon.merchant} · ` : ''}

@@ -560,6 +560,32 @@ describe('Apps Script web app', () => {
     expect(sheet.data.length).toBe(rowsBefore);
   });
 
+  it('admin lists coupons across all users', () => {
+    createCoupon({ title: 'ของ tar', couponCode: 'M1', qrRawValue: 'M1' });
+    createCoupon({ userId: 'other', title: 'ของ other', couponCode: 'O1', qrRawValue: 'O1' });
+
+    const result = gas.call('adminListCoupons', { status: 'all' });
+    expect(result.ok).toBe(true);
+    const items = result.data!.items as Array<Record<string, unknown>>;
+    expect(items.map((item) => item.userId).sort()).toEqual(['other', 'tar']);
+
+    const filtered = gas.call('adminListCoupons', { q: 'other' });
+    expect((filtered.data!.items as Array<Record<string, unknown>>).length).toBe(1);
+  });
+
+  it('admin purges a coupon that belongs to another user', () => {
+    const coupon = createCoupon({ userId: 'other' });
+    const fileId = String(coupon.imageFileId);
+
+    const result = gas.call('adminPurgeCoupon', { couponId: coupon.couponId });
+    expect(result.ok).toBe(true);
+    expect(result.data).toMatchObject({ couponId: coupon.couponId, deleted: true });
+    expect(gas.filesById.get(fileId)?.trashed).toBe(true);
+
+    const list = gas.call('adminListCoupons', { status: 'all' });
+    expect(list.data!.items).toEqual([]);
+  });
+
   it('computes stats', () => {
     createCoupon({ title: 'A', couponCode: 'A1', qrRawValue: 'A1', expiryDate: addDays(today(), 2) });
     const used = createCoupon({ title: 'B', couponCode: 'B2', qrRawValue: 'B2', expiryDate: addDays(today(), 10) });

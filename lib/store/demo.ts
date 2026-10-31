@@ -409,6 +409,43 @@ export async function listCoupons(options: ListCouponsOptions): Promise<ListResu
   return { items: sorted.map(sanitizeCoupon), total: filtered.length };
 }
 
+/** admin: คูปองของทุก user */
+export async function listAllCoupons(
+  options: Omit<ListCouponsOptions, 'userId'>,
+): Promise<ListResult> {
+  const db = await readDb();
+  const limit = Math.min(Math.max(options.limit ?? 500, 1), 1000);
+  const q = options.q?.trim() ?? '';
+  const filtered = filterCoupons(stripDeleted(db.coupons), { status: options.status, q });
+  const sorted = sortCoupons(filtered).slice(0, limit);
+  return { items: sorted.map(sanitizeCoupon), total: filtered.length };
+}
+
+/** admin: ลบถาวรได้ทุก user */
+export async function purgeCouponAny(couponId: string): Promise<void> {
+  return withLock(async () => {
+    const db = await readDb();
+    const index = db.coupons.findIndex((coupon) => coupon.couponId === couponId);
+    if (index < 0) throw notFound();
+
+    const [removed] = db.coupons.splice(index, 1);
+    if (removed.imageFileId && removed.userId) {
+      try {
+        await fs.unlink(path.join(UPLOAD_DIR, removed.imageFileId));
+      } catch {
+        // ไฟล์อาจหายแล้ว
+      }
+    }
+
+    pushLog(db, couponId, 'deleted', removed.status, removed.status, {
+      userId: removed.userId,
+      purge: true,
+      by: 'admin',
+    });
+    await writeDb(db);
+  });
+}
+
 export async function getSharedCoupon(couponId: string): Promise<Coupon> {
   const db = await readDb();
   const coupon = db.coupons.find((item) => item.couponId === couponId && !item.deletedAt);

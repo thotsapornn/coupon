@@ -22,7 +22,7 @@ export function matchesStatus(
 export function matchesQuery(coupon: Coupon, query: string): boolean {
   const needle = query.trim().toLowerCase();
   if (!needle) return true;
-  return [coupon.title, coupon.merchant, coupon.couponCode, coupon.discountText, coupon.description]
+  return [coupon.title, coupon.merchant, coupon.couponCode, coupon.discountText, coupon.description, coupon.userId]
     .filter(Boolean)
     .some((value) => value!.toLowerCase().includes(needle));
 }

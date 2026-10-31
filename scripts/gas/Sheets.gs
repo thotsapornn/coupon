@@ -38,12 +38,16 @@ var ERROR_HEADERS = ['timestamp', 'requestId', 'action', 'code', 'message', 'sta
 /* Sheets bootstrap                                                     */
 /* ------------------------------------------------------------------ */
 
+var __spreadsheet = null;
+
 function getSpreadsheet() {
+  if (__spreadsheet) return __spreadsheet;
   var properties = PropertiesService.getScriptProperties();
   var configuredId = properties.getProperty('spreadsheetId');
   if (configuredId) {
     try {
-      return SpreadsheetApp.openById(configuredId);
+      __spreadsheet = SpreadsheetApp.openById(configuredId);
+      return __spreadsheet;
     } catch (error) {
       // ถ้า id ไม่ถูกต้อง ให้ fallback ไปใช้ bound spreadsheet
     }
@@ -56,7 +60,8 @@ function getSpreadsheet() {
     );
   }
   properties.setProperty('spreadsheetId', active.getId());
-  return active;
+  __spreadsheet = active;
+  return __spreadsheet;
 }
 
 function ensureSheet(name, headers) {
@@ -141,8 +146,20 @@ function setConfig(key, value) {
 /* Coupons                                                              */
 /* ------------------------------------------------------------------ */
 
+function getCouponSheet() {
+  var sheet = getSpreadsheet().getSheetByName('Coupons');
+  if (!sheet) sheet = ensureSheet('Coupons', COUPON_HEADERS);
+  return sheet;
+}
+
+function getHistorySheet() {
+  var sheet = getSpreadsheet().getSheetByName('UsageHistory');
+  if (!sheet) sheet = ensureSheet('UsageHistory', HISTORY_HEADERS);
+  return sheet;
+}
+
 function readAllCoupons() {
-  var sheet = ensureSheet('Coupons', COUPON_HEADERS);
+  var sheet = getCouponSheet();
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
 
@@ -272,7 +289,7 @@ function appendLog(entry) {
 }
 
 function readAllLogIds() {
-  var sheet = ensureSheet('UsageHistory', HISTORY_HEADERS);
+  var sheet = getHistorySheet();
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
   return sheet
@@ -284,7 +301,7 @@ function readAllLogIds() {
 }
 
 function listLogs(couponId) {
-  var sheet = ensureSheet('UsageHistory', HISTORY_HEADERS);
+  var sheet = getHistorySheet();
   var lastRow = sheet.getLastRow();
   if (lastRow < 2) return [];
 

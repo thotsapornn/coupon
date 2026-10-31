@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound as nextNotFound } from 'next/navigation';
 import { ArrowLeftIcon, ClockIcon, QrIcon } from '@/components/Icons';
 import { CopyButton } from '@/components/CopyButton';
+import { CouponImage } from '@/components/CouponImage';
 import { QrTabs } from '@/components/QrTabs';
 import { ShareCouponButton } from '@/components/ShareCouponButton';
 import { StatusBadge } from '@/components/StatusBadge';
@@ -144,10 +145,11 @@ export default async function SharedCouponPage({ params }: PageProps) {
 
       <div className="detail-media" style={{ marginTop: 16 }}>
         {coupon.imageUrl ? (
-          <a href={coupon.imageUrl} target="_blank" rel="noreferrer" aria-label="เปิดรูปต้นฉบับ">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={toDisplayImageUrl(coupon.imageUrl)} alt={`คูปอง ${coupon.title}`} />
-          </a>
+          <CouponImage
+            src={toDisplayImageUrl(coupon.imageUrl) ?? coupon.imageUrl}
+            alt={`คูปอง ${coupon.title}`}
+            originalHref={coupon.imageUrl}
+          />
         ) : (
           <div className="detail-placeholder">
             <QrIcon size={34} />

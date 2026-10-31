@@ -1,7 +1,7 @@
 import { fail, ok } from '@/lib/api';
 import { ADMIN_USER_ID, isAdminRequest } from '@/lib/auth';
 import { ApiError } from '@/lib/errors';
-import { purgeCoupon } from '@/lib/store';
+import { purgeCoupon, purgeCouponAny } from '@/lib/store';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -19,7 +19,16 @@ export async function DELETE(_request: Request, context: Context) {
       throw new ApiError('VALIDATION_ERROR', 'couponId ไม่ถูกต้อง', 400);
     }
 
-    await purgeCoupon(id, ADMIN_USER_ID);
+    try {
+      await purgeCouponAny(id);
+    } catch (error) {
+      // GAS เวอร์ชันเก่า: ลบได้เฉพาะของ admintatar
+      if (error instanceof ApiError && error.message.includes('adminPurgeCoupon')) {
+        await purgeCoupon(id, ADMIN_USER_ID);
+      } else {
+        throw error;
+      }
+    }
     return ok({ couponId: id, deleted: true });
   } catch (error) {
     return fail(error);

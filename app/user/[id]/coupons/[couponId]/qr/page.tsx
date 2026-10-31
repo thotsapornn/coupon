@@ -31,7 +31,7 @@ export default async function CouponQrPage({ params }: PageProps) {
   const copyValue = coupon.couponCode || coupon.qrRawValue || '';
 
   return (
-    <div className="page page-narrow">
+    <div className="page">
       <Link href={`/user/${actorId}/coupons/${coupon.couponId}`} className="back-link">
         <ArrowLeftIcon size={15} />
         กลับไปรายละเอียดคูปอง

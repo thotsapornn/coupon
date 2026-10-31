@@ -12,6 +12,7 @@ import { formatThaiDate } from '@/lib/format';
 import { checkTextLanguage } from '@/lib/language-check';
 import { CouponFields, emptyCouponForm, type CouponFormState } from './CouponFields';
 import { ImageCropper } from './ImageCropper';
+import { ImageViewer } from './ImageViewer';
 import {
   AlertIcon,
   CameraIcon,
@@ -93,6 +94,7 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
   const [duplicate, setDuplicate] = useState<ExistingCoupon | null>(null);
   const [source, setSource] = useState<'upload' | 'paste'>('upload');
   const [cropping, setCropping] = useState(false);
+  const [viewing, setViewing] = useState(false);
   const [pending, setPending] = useState<PendingCrop | null>(null);
 
   // ต้องอยู่ก่อน early return ทุกตัว ไม่งั้น hook count เปลี่ยนตอนเปลี่ยน phase → React error #310
@@ -135,6 +137,7 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
     setError(null);
     setDuplicate(null);
     setCropping(false);
+    setViewing(false);
     setPending(null);
     if (inputRef.current) inputRef.current.value = '';
     if (cameraRef.current) cameraRef.current.value = '';
@@ -510,17 +513,31 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
       <div className="review-grid">
         <aside className="review-media">
           {image ? (
-            <div className="review-preview">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={image.dataUrl} alt="Screenshot คูปองที่อัปโหลด" />
+            <div className="review-preview is-compact">
+              <button
+                type="button"
+                className="review-preview-open"
+                onClick={() => setViewing(true)}
+                aria-label="ดูรูปเต็ม"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={image.dataUrl} alt="Screenshot คูปองที่อัปโหลด" />
+              </button>
               <div className="review-preview-actions">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setViewing(true)}
+                >
+                  ดู
+                </button>
                 <button
                   type="button"
                   className="btn btn-secondary btn-sm"
                   onClick={() => setCropping(true)}
                   disabled={saving}
                 >
-                  ครอปรูป
+                  แก้ไข
                 </button>
               </div>
             </div>
@@ -664,6 +681,18 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
           </div>
         </div>
       </div>
+
+      {viewing && image ? (
+        <ImageViewer
+          src={image.dataUrl}
+          alt="รูปคูปอง"
+          onClose={() => setViewing(false)}
+          onEdit={() => {
+            setViewing(false);
+            setCropping(true);
+          }}
+        />
+      ) : null}
 
       {cropping && image ? (
         <ImageCropper

@@ -88,6 +88,22 @@ export async function listCoupons(options: ListCouponsOptions): Promise<ListResu
   });
 }
 
+/** admin: คูปองของทุก user */
+export async function listAllCoupons(
+  options: Omit<ListCouponsOptions, 'userId'>,
+): Promise<ListResult> {
+  return call<ListResult>('adminListCoupons', {
+    status: options.status ?? 'all',
+    q: options.q ?? '',
+    limit: options.limit ?? 500,
+  });
+}
+
+/** admin: ลบถาวรได้ทุก user */
+export async function purgeCouponAny(couponId: string): Promise<void> {
+  await call<{ couponId: string; deleted: boolean }>('adminPurgeCoupon', { couponId });
+}
+
 export async function getSharedCoupon(couponId: string): Promise<Coupon> {
   const data = await call<{ coupon: Coupon }>('getSharedCoupon', { couponId });
   return data.coupon;

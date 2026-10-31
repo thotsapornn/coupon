@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import { SiteFooter, SiteHeader } from '@/components/SiteChrome';
-import { storeMode } from '@/lib/store';
+import { SiteHeader } from '@/components/SiteChrome';
 
 export const metadata: Metadata = {
   title: {
@@ -16,8 +15,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   themeColor: '#f7f5f1',
 };
 
@@ -27,7 +24,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <SiteHeader />
         <main>{children}</main>
-        <SiteFooter mode={storeMode()} />
       </body>
     </html>
   );

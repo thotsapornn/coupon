@@ -12,6 +12,16 @@ var TZ = 'Asia/Bangkok';
 var TOKEN_PROPERTY = 'SHARED_SECRET';
 var MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
+var WRITE_ACTIONS = {
+  createCoupon: true,
+  updateCoupon: true,
+  markUsed: true,
+  undoUsed: true,
+  deleteCoupon: true,
+  purgeCoupon: true,
+  adminPurgeCoupon: true,
+};
+
 function doGet() {
   return jsonOut({
     ok: true,
@@ -39,6 +49,8 @@ function doPost(e) {
       ping: handlePing,
       createCoupon: handleCreateCoupon,
       listCoupons: handleListCoupons,
+      adminListCoupons: handleAdminListCoupons,
+      adminPurgeCoupon: handleAdminPurgeCoupon,
       getCoupon: handleGetCoupon,
       getSharedCoupon: handleGetSharedCoupon,
       updateCoupon: handleUpdateCoupon,
@@ -55,7 +67,8 @@ function doPost(e) {
       return respondError('VALIDATION_ERROR', 'ไม่รู้จัก action: ' + action, requestId);
     }
 
-    ensureAllSheets();
+    // อ่านอย่างเดียวไม่ต้อง bootstrap ชีตทุกแท็บ (ประหยัด ~2-3 วินาทีต่อ request)
+    if (WRITE_ACTIONS[action]) ensureAllSheets();
     var data = handler(payload, requestId);
     return respondOk(data, requestId);
   } catch (error) {
@@ -179,6 +192,81 @@ function handleListCoupons(payload) {
     items: sorted.map(unsanitizeCoupon),
     total: filtered.length,
   };
+}
+
+
+/** admin: ดูคูปองของทุก user */
+function handleAdminListCoupons(payload) {
+  var all = readAllCoupons();
+  var status = payload.status || 'all';
+  var query = String(payload.q || '').trim().toLowerCase();
+  var userFilter = String(payload.filterUserId || '').trim().toLowerCase();
+  var limit = Math.min(Math.max(Number(payload.limit) || 500, 1), 1000);
+  var today = todayBangkok();
+
+  var filtered = all.filter(function (coupon) {
+    if (coupon.deletedAt) return false;
+    if (userFilter && String(coupon.userId) !== userFilter) return false;
+    return matchesStatus(coupon, status, today);
+  });
+
+  if (query) {
+    filtered = filtered.filter(function (coupon) {
+      var haystack = [
+        coupon.title,
+        coupon.merchant,
+        coupon.couponCode,
+        coupon.discountText,
+        coupon.description,
+        coupon.userId,
+      ]
+        .join(' ')
+        .toLowerCase();
+      return haystack.indexOf(query) !== -1;
+    });
+  }
+
+  var sorted = sortCoupons(filtered, today).slice(0, limit);
+  return { items: sorted.map(unsanitizeCoupon), total: filtered.length };
+}
+
+/** admin: ลบถาวรได้ทุก user */
+function handleAdminPurgeCoupon(payload) {
+  return withLock(function () {
+    var couponId = requireString(payload.couponId, 'couponId');
+    var all = readAllCoupons();
+    var found = null;
+
+    for (var i = 0; i < all.length; i += 1) {
+      if (all[i].couponId === couponId) {
+        found = { coupon: all[i], rowIndex: i + 2 };
+        break;
+      }
+    }
+    if (!found) throw appError('NOT_FOUND', 'ไม่พบคูปองนี้');
+
+    deleteCouponRow(found.rowIndex);
+    if (found.coupon.imageFileId) trashFile(found.coupon.imageFileId);
+
+    try {
+      appendLog({
+        couponId: couponId,
+        action: 'admin_deleted',
+        fromStatus: found.coupon.status,
+        toStatus: '',
+        metadata: {
+          userId: found.coupon.userId,
+          imageFileId: found.coupon.imageFileId || '',
+          purge: true,
+          by: 'admin',
+        },
+      });
+    } catch (logError) {
+      // แถวถูกลบแล้ว — ไม่ให้ log ทำให้ request ล้มเหลว
+    }
+
+    return { couponId: couponId, deleted: true };
+  });
 }
 
 function handleGetSharedCoupon(payload) {
