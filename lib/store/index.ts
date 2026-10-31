@@ -54,6 +54,12 @@ export function deleteCoupon(couponId: string, userId: string): Promise<Coupon> 
     : demo.deleteCoupon(couponId, userId);
 }
 
+export function purgeCoupon(couponId: string, userId: string): Promise<void> {
+  return storeMode() === 'gas'
+    ? gas.purgeCoupon(couponId, userId)
+    : demo.purgeCoupon(couponId, userId);
+}
+
 export function listHistory(couponId: string, userId: string): Promise<UsageLog[]> {
   return storeMode() === 'gas'
     ? gas.listHistory(couponId, userId)

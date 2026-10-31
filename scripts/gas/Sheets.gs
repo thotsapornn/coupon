@@ -192,6 +192,18 @@ function writeCouponRow(rowIndex, coupon) {
   sheet.getRange(rowIndex, 1, 1, COUPON_HEADERS.length).setValues([couponToRow(coupon)]);
 }
 
+/**
+ * ลบแถวคูปองจริง (ใช้เฉพาะ admin purge — กู้คืนไม่ได้)
+ * rowIndex นับจากแถวข้อมูลจริงในชีต (header = แถว 1)
+ */
+function deleteCouponRow(rowIndex) {
+  var sheet = ensureSheet('Coupons', COUPON_HEADERS);
+  if (rowIndex < 2 || rowIndex > sheet.getLastRow()) {
+    throw appError('NOT_FOUND', 'ไม่พบแถวคูปองที่ต้องการลบ');
+  }
+  sheet.deleteRow(rowIndex);
+}
+
 function locateCoupon(all, couponId) {
   for (var i = 0; i < all.length; i += 1) {
     if (all[i].couponId === couponId && !all[i].deletedAt) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -10,6 +10,8 @@ export interface ConfirmDialogProps {
   cancelLabel?: string;
   tone?: 'primary' | 'danger';
   busy?: boolean;
+  /** ถ้าใส่ค่า ผู้ใช้ต้องพิมพ์ค่านี้ให้ตรงก่อนจึงกดยืนยันได้ */
+  requireText?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -22,9 +24,16 @@ export function ConfirmDialog({
   cancelLabel = 'ยกเลิก',
   tone = 'primary',
   busy = false,
+  requireText,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const [typed, setTyped] = useState('');
+
+  useEffect(() => {
+    if (open) setTyped('');
+  }, [open, requireText]);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (event: KeyboardEvent) => {
@@ -35,6 +44,8 @@ export function ConfirmDialog({
   }, [open, busy, onCancel]);
 
   if (!open) return null;
+
+  const canConfirm = !requireText || typed === requireText;
 
   return (
     <div
@@ -55,6 +66,24 @@ export function ConfirmDialog({
           {title}
         </h2>
         <p className="modal-text">{text}</p>
+
+        {requireText ? (
+          <div className="field modal-field">
+            <label htmlFor="confirm-text">
+              พิมพ์ <code>{requireText}</code> เพื่อยืนยัน
+            </label>
+            <input
+              id="confirm-text"
+              value={typed}
+              onChange={(event) => setTyped(event.target.value)}
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              disabled={busy}
+            />
+          </div>
+        ) : null}
+
         <div className="modal-actions">
           <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={busy}>
             {cancelLabel}
@@ -63,7 +92,7 @@ export function ConfirmDialog({
             type="button"
             className={`btn ${tone === 'danger' ? 'btn-danger' : 'btn-primary'}`}
             onClick={onConfirm}
-            disabled={busy}
+            disabled={busy || !canConfirm}
           >
             {busy ? 'กำลังดำเนินการ…' : confirmLabel}
           </button>

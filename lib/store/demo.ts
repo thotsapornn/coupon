@@ -612,6 +612,33 @@ export async function deleteCoupon(couponId: string, userId: string): Promise<Co
   });
 }
 
+/** ลบถาวร (admin) — เอาไฟล์รูปออกด้วย */
+export async function purgeCoupon(couponId: string, userId: string): Promise<void> {
+  return withLock(async () => {
+    const actorId = requireActor(userId);
+    const db = await readDb();
+    const index = db.coupons.findIndex(
+      (coupon) => coupon.couponId === couponId && coupon.userId === actorId,
+    );
+    if (index < 0) throw notFound();
+
+    const [removed] = db.coupons.splice(index, 1);
+    if (removed.imageFileId) {
+      try {
+        await fs.unlink(path.join(UPLOAD_DIR, removed.imageFileId));
+      } catch {
+        // ไฟล์อาจหายไปแล้ว — ไม่ให้การลบแถวข้อมูลล้มเหลว
+      }
+    }
+
+    pushLog(db, couponId, 'deleted', removed.status, removed.status, {
+      userId: actorId,
+      purge: true,
+    });
+    await writeDb(db);
+  });
+}
+
 export async function listHistory(couponId: string, userId: string): Promise<UsageLog[]> {
   const db = await readDb();
   const actorId = requireActor(userId);

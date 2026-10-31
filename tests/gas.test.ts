@@ -78,6 +78,10 @@ class MockSheet {
   setFrozenRows(): void {}
 
   insertRowAfter(): void {}
+
+  deleteRow(rowPosition: number): void {
+    this.data.splice(rowPosition - 1, 1);
+  }
 }
 
 class MockSpreadsheet {
@@ -313,6 +317,7 @@ function buildGas() {
     context,
     spreadsheet,
     properties,
+    filesById,
     call(action: string, payload: Record<string, unknown>, token = 'test-secret') {
       const withUser =
         action === 'ping' || payload.userId !== undefined ? payload : { ...payload, userId: 'tar' };
@@ -518,6 +523,41 @@ describe('Apps Script web app', () => {
 
     const detail = gas.call('getCoupon', { couponId: coupon.couponId });
     expect(detail.error?.code).toBe('NOT_FOUND');
+  });
+
+  it('purges a coupon permanently: row, Drive file and audit log', () => {
+    const coupon = createCoupon();
+    const sheet = gas.spreadsheet.getSheetByName('Coupons')!;
+    const rowsBefore = sheet.data.length;
+    const fileId = String(coupon.imageFileId);
+    expect(fileId).toBeTruthy();
+    expect(gas.filesById.get(fileId)?.trashed).toBe(false);
+
+    const result = gas.call('purgeCoupon', { couponId: coupon.couponId });
+    expect(result.ok).toBe(true);
+    expect(result.data).toMatchObject({ couponId: coupon.couponId, deleted: true });
+
+    expect(sheet.data.length).toBe(rowsBefore - 1);
+    expect(gas.filesById.get(fileId)?.trashed).toBe(true);
+
+    const history = gas.spreadsheet.getSheetByName('UsageHistory')!;
+    const last = history.data[history.data.length - 1];
+    expect(String(last[1])).toBe(coupon.couponId);
+    expect(String(last[2])).toBe('admin_deleted');
+
+    const list = gas.call('listCoupons', { status: 'all' });
+    expect(list.data!.items).toEqual([]);
+  });
+
+  it('refuses to purge a coupon that belongs to another user', () => {
+    const coupon = createCoupon({ userId: 'other' });
+    const sheet = gas.spreadsheet.getSheetByName('Coupons')!;
+    const rowsBefore = sheet.data.length;
+
+    const result = gas.call('purgeCoupon', { couponId: coupon.couponId });
+    expect(result.ok).toBe(false);
+    expect(result.error?.code).toBe('NOT_FOUND');
+    expect(sheet.data.length).toBe(rowsBefore);
   });
 
   it('computes stats', () => {

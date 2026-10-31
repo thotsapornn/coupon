@@ -2310,3 +2310,131 @@ ul, ol {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Admin (admintatar)                                                   */
+/* ------------------------------------------------------------------ */
+
+.admin-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.admin-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-head-actions form {
+  margin: 0;
+}
+
+.admin-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-row {
+  display: grid;
+  grid-template-columns: 22px 48px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.admin-row.is-selected {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.admin-check input,
+.admin-select-all input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--brand);
+}
+
+.admin-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg-deep);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+}
+
+.admin-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.admin-title {
+  font-size: 14px;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.admin-select-all {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.modal-field {
+  margin-top: 4px;
+}
+
+.modal-field code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: var(--bg-deep);
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+
+@media (min-width: 560px) {
+  .admin-head {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .admin-row {
+    grid-template-columns: 22px 48px minmax(0, 1fr) auto;
+  }
+
+  .admin-actions {
+    grid-column: auto;
+  }
+}

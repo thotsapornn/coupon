@@ -145,6 +145,11 @@ export async function deleteCoupon(couponId: string, userId: string): Promise<Co
   return data.coupon;
 }
 
+/** ลบถาวร (admin) — ลบแถวใน Sheets + ไฟล์ใน Drive, กู้คืนไม่ได้ */
+export async function purgeCoupon(couponId: string, userId: string): Promise<void> {
+  await call<{ couponId: string; deleted: boolean }>('purgeCoupon', { couponId, userId });
+}
+
 export async function listHistory(couponId: string, userId: string): Promise<UsageLog[]> {
   const data = await call<{ logs: UsageLog[] }>('listHistory', { couponId, userId });
   return data.logs;

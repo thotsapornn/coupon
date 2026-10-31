@@ -45,6 +45,7 @@ function doPost(e) {
       markUsed: handleMarkUsed,
       undoUsed: handleUndoUsed,
       deleteCoupon: handleDeleteCoupon,
+      purgeCoupon: handlePurgeCoupon,
       listHistory: handleListHistory,
       getStats: handleGetStats,
     };
@@ -326,6 +327,50 @@ function handleDeleteCoupon(payload) {
     });
 
     return { coupon: unsanitizeCoupon(found.coupon) };
+  });
+}
+
+/**
+ * ลบถาวร (admin): ลบแถวในชีต + ทิ้งไฟล์รูปใน Drive — กู้คืนไม่ได้
+ * ต่างจาก deleteCoupon ที่เป็น soft delete และไม่แตะไฟล์
+ */
+function handlePurgeCoupon(payload) {
+  return withLock(function () {
+    var userId = requireUserId(payload.userId);
+    var couponId = requireString(payload.couponId, 'couponId');
+    var all = readAllCoupons();
+    var found = null;
+
+    // ค้นหาทุกสถานะ รวมถึงใบที่ soft delete ไปแล้ว
+    for (var i = 0; i < all.length; i += 1) {
+      if (all[i].couponId === couponId && String(all[i].userId) === String(userId)) {
+        found = { coupon: all[i], rowIndex: i + 2 };
+        break;
+      }
+    }
+    if (!found) throw appError('NOT_FOUND', 'ไม่พบคูปองนี้');
+
+    deleteCouponRow(found.rowIndex);
+
+    if (found.coupon.imageFileId) trashFile(found.coupon.imageFileId);
+
+    try {
+      appendLog({
+        couponId: couponId,
+        action: 'admin_deleted',
+        fromStatus: found.coupon.status,
+        toStatus: '',
+        metadata: {
+          userId: userId,
+          imageFileId: found.coupon.imageFileId || '',
+          purge: true,
+        },
+      });
+    } catch (logError) {
+      // แถวถูกลบไปแล้ว — ไม่ให้การเขียน log ทำให้ request ล้มเหลว
+    }
+
+    return { couponId: couponId, deleted: true };
   });
 }
 
