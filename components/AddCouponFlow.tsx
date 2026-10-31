@@ -11,6 +11,7 @@ import { normalizeForCompare, parseCouponFields } from '@/lib/parser';
 import { formatThaiDate } from '@/lib/format';
 import { checkTextLanguage } from '@/lib/language-check';
 import { CouponFields, emptyCouponForm, type CouponFormState } from './CouponFields';
+import { ImageCropper } from './ImageCropper';
 import {
   AlertIcon,
   CameraIcon,
@@ -64,6 +65,7 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
   const [saving, setSaving] = useState(false);
   const [duplicate, setDuplicate] = useState<ExistingCoupon | null>(null);
   const [source, setSource] = useState<'upload' | 'paste'>('upload');
+  const [cropping, setCropping] = useState(false);
 
   // ต้องอยู่ก่อน early return ทุกตัว ไม่งั้น hook count เปลี่ยนตอนเปลี่ยน phase → React error #310
   const language = useMemo(
@@ -99,6 +101,7 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
     setOcrError(null);
     setError(null);
     setDuplicate(null);
+    setCropping(false);
     if (inputRef.current) inputRef.current.value = '';
     if (cameraRef.current) cameraRef.current.value = '';
   }, []);
@@ -111,6 +114,7 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
     setOcrError(null);
     setDuplicate(null);
     setErrors({});
+    setCropping(false);
     setProgress({ stage: 'loading-core', progress: 0, label: 'กำลังเตรียมรูป…' });
     setTimings({});
 
@@ -425,6 +429,18 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
             </div>
           ) : null}
 
+          {image ? (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm btn-block"
+              onClick={() => setCropping(true)}
+              disabled={saving}
+              style={{ marginTop: 8 }}
+            >
+              ครอปรูป
+            </button>
+          ) : null}
+
           <div className="review-meta">
             {meta.size ? <span>{meta.size.width} × {meta.size.height} px</span> : null}
             {timings.qr !== undefined ? <span>QR {timings.qr} ms</span> : null}
@@ -560,6 +576,21 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
           </div>
         </div>
       </div>
+
+      {cropping && image ? (
+        <ImageCropper
+          image={image}
+          onCancel={() => setCropping(false)}
+          onApply={(next) => {
+            setImage(next);
+            setMeta((current) => ({
+              ...current,
+              size: { width: next.width, height: next.height },
+            }));
+            setCropping(false);
+          }}
+        />
+      ) : null}
     </form>
   );
 }

@@ -159,6 +159,49 @@ export async function prepareImage(file: File): Promise<PreparedImage> {
   };
 }
 
+/**
+ * ครอปรูปที่เตรียมไว้แล้ว (พิกัดเป็น pixel ของ image.canvas)
+ * คืน PreparedImage ใหม่ที่เข้ารหัสตามขนาดเป้าหมายเดิม
+ */
+export function cropPreparedImage(
+  source: PreparedImage,
+  rect: { x: number; y: number; width: number; height: number },
+): PreparedImage {
+  const canvas = document.createElement('canvas');
+  const width = Math.max(1, Math.round(rect.width));
+  const height = Math.max(1, Math.round(rect.height));
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('เบราว์เซอร์ไม่รองรับการประมวลผลรูปภาพ');
+
+  context.drawImage(
+    source.canvas,
+    Math.max(0, Math.round(rect.x)),
+    Math.max(0, Math.round(rect.y)),
+    width,
+    height,
+    0,
+    0,
+    width,
+    height,
+  );
+
+  const encoded = encodeStoredImage(canvas);
+  const base64 = encoded.dataUrl.split(',')[1] ?? '';
+  if (!base64) throw new Error('แปลงรูปเป็นข้อมูลไม่สำเร็จ');
+
+  return {
+    dataUrl: encoded.dataUrl,
+    base64,
+    mimeType: encoded.mimeType,
+    width,
+    height,
+    canvas,
+  };
+}
+
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;

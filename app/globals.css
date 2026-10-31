@@ -2438,3 +2438,115 @@ ul, ol {
     grid-column: auto;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Image cropper                                                        */
+/* ------------------------------------------------------------------ */
+
+.crop-modal {
+  width: min(100%, 560px);
+  max-height: 92vh;
+  overflow-y: auto;
+  background: var(--surface);
+  border-radius: 22px;
+  padding: 16px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.crop-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.crop-close {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-soft);
+  color: var(--ink-soft);
+}
+
+.crop-close:disabled {
+  opacity: 0.5;
+}
+
+.crop-stage {
+  position: relative;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 10px;
+  line-height: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.crop-stage img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.crop-rect {
+  position: absolute;
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+  cursor: move;
+  touch-action: none;
+}
+
+.crop-handle {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 2px solid var(--brand);
+  touch-action: none;
+}
+
+.crop-handle.nw {
+  left: 0;
+  top: 0;
+  cursor: nwse-resize;
+}
+
+.crop-handle.ne {
+  right: 0;
+  top: 0;
+  cursor: nesw-resize;
+}
+
+.crop-handle.sw {
+  left: 0;
+  bottom: 0;
+  cursor: nesw-resize;
+}
+
+.crop-handle.se {
+  right: 0;
+  bottom: 0;
+  cursor: nwse-resize;
+}
+
+.crop-hint {
+  text-align: center;
+}
+
+.crop-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
