@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { copyText } from '@/lib/clipboard';
+import { shareBaseUrl } from '@/lib/site-url';
 import { CheckIcon, ShareIcon } from './Icons';
 
 export function ShareCouponButton({
@@ -20,7 +21,7 @@ export function ShareCouponButton({
   const [status, setStatus] = useState<string | null>(null);
 
   function shareUrl(): string {
-    return `${window.location.origin}/share/${encodeURIComponent(couponId)}`;
+    return `${shareBaseUrl()}/share/${encodeURIComponent(couponId)}`;
   }
 
   async function handleShare() {

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { copyText } from '@/lib/clipboard';
+import { shareBaseUrl } from '@/lib/site-url';
 import { getBarcodeForText } from '@/lib/qr-display';
 import { BarcodeCanvas } from './BarcodeCanvas';
 import { CopyButton } from './CopyButton';
@@ -53,7 +54,7 @@ export function TextCodeTool({ initialText }: { initialText: string }) {
   }, [value]);
 
   function shareUrl(): string {
-    return `${window.location.origin}/qr?text=${encodeURIComponent(value)}`;
+    return `${shareBaseUrl()}/qr?text=${encodeURIComponent(value)}`;
   }
 
   async function copyLink() {
