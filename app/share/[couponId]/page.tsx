@@ -8,6 +8,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { getSharedCoupon } from '@/lib/store';
 import { ApiError } from '@/lib/errors';
 import { formatDateTime, formatThaiDate, getExpiryLabel } from '@/lib/format';
+import { toDisplayImageUrl } from '@/lib/image-url';
 
 export const dynamic = 'force-dynamic';
 
@@ -145,7 +146,7 @@ export default async function SharedCouponPage({ params }: PageProps) {
         {coupon.imageUrl ? (
           <a href={coupon.imageUrl} target="_blank" rel="noreferrer" aria-label="เปิดรูปต้นฉบับ">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={coupon.imageUrl} alt={`คูปอง ${coupon.title}`} />
+            <img src={toDisplayImageUrl(coupon.imageUrl)} alt={`คูปอง ${coupon.title}`} />
           </a>
         ) : (
           <div className="detail-placeholder">

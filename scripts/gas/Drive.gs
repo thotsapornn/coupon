@@ -66,7 +66,8 @@ function uploadImage(couponId, base64, mimeType) {
 
   return {
     fileId: file.getId(),
-    url: 'https://drive.google.com/file/d/' + file.getId() + '/view',
+    // ใช้ thumbnail เพราะ /view เป็นหน้า HTML ที่ <img> แสดงไม่ได้
+    url: 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w1200',
   };
 }
 

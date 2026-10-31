@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Coupon } from '@/lib/types';
 import { getCardExpiryLabel } from '@/lib/format';
+import { toDisplayImageUrl } from '@/lib/image-url';
 import { ClockIcon, QrIcon, TicketIcon } from './Icons';
 import { StatusBadge } from './StatusBadge';
 
@@ -25,7 +26,7 @@ export function CouponThumb({ coupon }: { coupon: Coupon }) {
   if (coupon.imageUrl && coupon.imageStatus === 'ok') {
     return (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={coupon.imageUrl} alt={`รูปคูปอง ${coupon.title}`} loading="lazy" />
+      <img src={toDisplayImageUrl(coupon.imageUrl)} alt={`รูปคูปอง ${coupon.title}`} loading="lazy" />
     );
   }
 

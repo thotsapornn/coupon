@@ -15,6 +15,7 @@ import { CopyButton } from '@/components/CopyButton';
 import { getCoupon, listHistory } from '@/lib/store';
 import { ApiError } from '@/lib/errors';
 import { formatDateTime, formatThaiDate, getDisplayStatus, getExpiryLabel } from '@/lib/format';
+import { toDisplayImageUrl } from '@/lib/image-url';
 import { normalizeUserId } from '@/lib/user';
 
 export const dynamic = 'force-dynamic';
@@ -85,7 +86,7 @@ export default async function CouponDetailPage({ params, searchParams }: PagePro
             {coupon.imageUrl ? (
               <a href={coupon.imageUrl} target="_blank" rel="noreferrer" aria-label="เปิดรูปต้นฉบับ">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={coupon.imageUrl} alt={`Screenshot คูปอง ${coupon.title}`} />
+                <img src={toDisplayImageUrl(coupon.imageUrl)} alt={`Screenshot คูปอง ${coupon.title}`} />
               </a>
             ) : (
               <div className="detail-placeholder">
