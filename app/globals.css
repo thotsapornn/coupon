@@ -355,7 +355,8 @@ ul, ol {
   background: rgba(255, 255, 255, 0.55);
 }
 
-.tab[aria-pressed="true"] {
+.tab[aria-pressed="true"],
+.tab[aria-selected="true"] {
   background: var(--surface);
   color: var(--ink);
   box-shadow: var(--shadow-sm);
@@ -375,7 +376,8 @@ ul, ol {
   font-variant-numeric: tabular-nums;
 }
 
-.tab[aria-pressed="true"] .tab-count {
+.tab[aria-pressed="true"] .tab-count,
+.tab[aria-selected="true"] .tab-count {
   background: var(--brand-soft);
   color: var(--brand-dark);
 }
@@ -2760,4 +2762,19 @@ button.back-link {
   background: none;
   font-family: inherit;
   cursor: pointer;
+}
+
+/* Detail tabs */
+.detail-tabs-wrap {
+  margin-top: 18px;
+}
+
+.detail-tabs {
+  margin-bottom: 14px;
+}
+
+.detail-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
