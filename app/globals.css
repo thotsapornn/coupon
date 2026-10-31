@@ -879,6 +879,30 @@ ul, ol {
   background: #d6ece2;
 }
 
+/* ระดับความสำคัญ: success = ลงมือหลัก, danger-ghost = ทำลายข้อมูลแบบไม่เด่น */
+.btn-success {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+  box-shadow: 0 4px 12px rgba(29, 107, 78, 0.22);
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #175a41;
+  border-color: #175a41;
+}
+
+.btn-danger-ghost {
+  background: transparent;
+  color: var(--red);
+  border-color: rgba(176, 42, 32, 0.28);
+}
+
+.btn-danger-ghost:hover:not(:disabled) {
+  background: var(--red-soft);
+  border-color: var(--red);
+}
+
 .btn-sm {
   padding: 8px 13px;
   font-size: 12.5px;

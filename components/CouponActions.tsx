@@ -89,7 +89,7 @@ export function CouponActions({ coupon, actorId }: { coupon: Coupon; actorId: st
       <div className="detail-actions">
         <div className="detail-action-row">
           {coupon.status === 'unused' ? (
-            <button type="button" className="btn btn-primary" onClick={() => setAction('use')}>
+            <button type="button" className="btn btn-success" onClick={() => setAction('use')}>
               <CheckIcon size={16} />
               ใช้คูปองแล้ว
             </button>
@@ -117,7 +117,7 @@ export function CouponActions({ coupon, actorId }: { coupon: Coupon; actorId: st
         </div>
 
         <div className="detail-action-row is-danger">
-          <button type="button" className="btn btn-danger" onClick={() => setAction('delete')}>
+          <button type="button" className="btn btn-danger-ghost" onClick={() => setAction('delete')}>
             <TrashIcon size={16} />
             ลบคูปองนี้
           </button>
