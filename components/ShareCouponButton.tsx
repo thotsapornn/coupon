@@ -11,12 +11,15 @@ export function ShareCouponButton({
   label = 'แชร์',
   className = 'btn btn-secondary',
   copyOnly = false,
+  iconOnly = false,
 }: {
   couponId: string;
   title: string;
   label?: string;
   className?: string;
   copyOnly?: boolean;
+  /** แสดงเฉพาะไอคอน (ยังมี aria-label ครบ) */
+  iconOnly?: boolean;
 }) {
   const [status, setStatus] = useState<string | null>(null);
 
@@ -58,7 +61,7 @@ export function ShareCouponButton({
       ) : (
         <ShareIcon size={15} />
       )}
-      {status ?? label}
+      {iconOnly ? null : (status ?? label)}
     </button>
   );
 }

@@ -126,7 +126,6 @@ export function CouponActions({
         </div>
 
         <div className="detail-action-row">
-          <ShareCouponButton couponId={coupon.couponId} title={coupon.title} className="btn btn-secondary" />
           <ShareCouponButton
             couponId={coupon.couponId}
             title={coupon.title}

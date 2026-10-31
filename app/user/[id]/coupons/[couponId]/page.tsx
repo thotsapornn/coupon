@@ -10,6 +10,7 @@ import {
   QrIcon,
 } from '@/components/Icons';
 import { CopyButton } from '@/components/CopyButton';
+import { ShareCouponButton } from '@/components/ShareCouponButton';
 import { CouponImage } from '@/components/CouponImage';
 import { getCoupon, listHistory } from '@/lib/store';
 import { ApiError } from '@/lib/errors';
@@ -192,7 +193,16 @@ export default async function CouponDetailPage({ params, searchParams }: PagePro
             <StatusBadge coupon={coupon} />
             {coupon.duplicateOf ? <span className="badge badge-expiring">อาจซ้ำ</span> : null}
           </div>
-          <h1 className="detail-title">{coupon.title}</h1>
+          <div className="detail-title-row">
+            <h1 className="detail-title">{coupon.title}</h1>
+            <ShareCouponButton
+              couponId={coupon.couponId}
+              title={coupon.title}
+              label="แชร์"
+              iconOnly
+              className="btn btn-secondary btn-icon"
+            />
+          </div>
           {coupon.discountText ? <p className="coupon-discount">{coupon.discountText}</p> : null}
           <div className="detail-sub">
             <span className={`coupon-expiry tone-${expiry.tone}`}>

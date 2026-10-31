@@ -2794,3 +2794,14 @@ button.back-link {
   gap: 14px;
   margin-top: 16px;
 }
+
+.detail-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.detail-title-row .detail-title {
+  min-width: 0;
+}
