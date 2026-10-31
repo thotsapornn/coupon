@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#f7f5f1">
+<title>Coupon Wallet — เก็บคูปองง่าย ๆ</title>
+<style>
+  :root {
+    --bg: #f7f5f1;
+    --surface: #fff;
+    --ink: #1b1917;
+    --muted: #736d63;
+    --line: #e6e1d7;
+    --line-strong: #d6d0c4;
+    --brand: #d0492a;
+    --brand-dark: #ab3a20;
+    --brand-soft: #fbeae4;
+    --green: #1d6b4e;
+    --green-soft: #e4f3ec;
+    --amber: #9a6412;
+    --amber-soft: #fbf0da;
+    --red: #b02a20;
+    --red-soft: #fbe7e5;
+    --radius: 18px;
+    --shadow: 0 1px 2px rgba(27,25,23,.05), 0 8px 24px rgba(27,25,23,.06);
+    --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai",
+      "IBM Plex Sans Thai", "Sarabun", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; min-height: 100dvh; background: var(--bg); color: var(--ink);
+    font-family: var(--font); font-size: 16px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, p { margin: 0; }
+  button, input, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .page { max-width: 480px; margin: 0 auto; padding: 22px 18px 70px; }
+
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(247,245,241,.9);
+    backdrop-filter: saturate(180%) blur(12px);
+    -webkit-backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .header-inner {
+    max-width: 480px; margin: 0 auto; padding: 11px 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .brand-mark {
+    width: 36px; height: 36px; border-radius: 12px; flex: none;
+    display: grid; place-items: center; color: #fff;
+    background: linear-gradient(140deg, #e2603c, #b93c1e);
+    box-shadow: 0 4px 12px rgba(176,58,32,.26);
+  }
+  .brand-text { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
+  .brand-text strong { font-size: 15.5px; letter-spacing: -.01em; }
+  .brand-text span { font-size: 11px; color: var(--muted); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    border: 1px solid transparent; border-radius: 999px; padding: 10px 16px;
+    font-size: 13.5px; font-weight: 650; background: var(--surface); color: var(--ink);
+    white-space: nowrap; transition: background .15s, border-color .15s, transform .1s, opacity .15s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-primary {
+    background: var(--brand); border-color: var(--brand); color: #fff;
+    box-shadow: 0 4px 12px rgba(176,58,32,.2);
+  }
+  .btn-primary:hover { background: var(--brand-dark); border-color: var(--brand-dark); }
+  .btn-secondary { border-color: var(--line-strong); }
+  .btn-secondary:hover { border-color: var(--ink); }
+  .btn-ghost { background: transparent; color: var(--muted); }
+  .btn-ghost:hover { background: rgba(27,25,23,.05); color: var(--ink); }
+  .btn-danger { background: var(--red-soft); color: var(--red); border-color: transparent; }
+  .btn-sm { padding: 7px 12px; font-size: 12.5px; }
+  .icon-btn {
+    width: 38px; height: 38px; padding: 0; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--surface);
+    display: inline-grid; place-items: center; color: var(--muted);
+  }
+  .icon-btn:hover { color: var(--ink); border-color: var(--line-strong); }
+
+  .intro { padding: 10px 0 20px; display: flex; flex-direction: column; gap: 6px; }
+  .intro h1 { font-size: clamp(25px, 5vw, 34px); line-height: 1.2; letter-spacing: -.03em; }
+  .intro p { color: var(--muted); font-size: 14px; max-width: 55ch; }
+
+  .toolbar { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .tabs {
+    display: flex; gap: 4px; padding: 4px; background: #efece5; border-radius: 999px;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab {
+    border: 0; background: transparent; color: #4d4841; padding: 8px 14px;
+    border-radius: 999px; font-size: 13px; font-weight: 600; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .tab[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 4px rgba(27,25,23,.08); }
+  .tab b { font-size: 11px; font-weight: 700; color: var(--muted); }
+  .tab[aria-pressed="true"] b { color: var(--brand-dark); }
+
+  .search { position: relative; }
+  .search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #a29a8e; }
+  .search input {
+    width: 100%; padding: 12px 14px 12px 42px; border-radius: 14px;
+    border: 1px solid var(--line-strong); background: var(--surface); font-size: 16px;
+  }
+  .search input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 4px rgba(208,73,42,.1); }
+
+  .count-line { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin: 10px 2px 12px; }
+
+  .grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column;
+    transition: box-shadow .18s, transform .18s;
+  }
+  .card:hover { box-shadow: 0 2px 6px rgba(27,25,23,.06), 0 14px 34px rgba(27,25,23,.09); transform: translateY(-2px); }
+  .card.is-used { opacity: .62; }
+  .thumb {
+    position: relative; display: block; width: 100%; padding: 0; border: 0;
+    background: #e8e2d8; aspect-ratio: 16 / 9; overflow: hidden;
+  }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+  .thumb .badge { position: absolute; left: 10px; top: 10px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px;
+    border-radius: 999px; font-size: 11px; font-weight: 700;
+    background: rgba(255,255,255,.94); color: var(--green);
+    border: 1px solid rgba(29,107,78,.16);
+  }
+  .badge.used { background: rgba(27,25,23,.72); color: #fff; border-color: transparent; }
+  .badge.expiring { background: var(--amber-soft); color: var(--amber); border-color: rgba(154,100,18,.18); }
+  .badge.expired { background: var(--red-soft); color: var(--red); border-color: rgba(176,42,32,.16); }
+
+  .card-body { padding: 12px 14px 13px; display: flex; flex-direction: column; gap: 3px; }
+  .card-body h3 {
+    font-size: 15.5px; font-weight: 700; letter-spacing: -.01em; line-height: 1.35;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .meta { font-size: 12px; color: var(--muted); }
+  .meta.warn { color: var(--amber); font-weight: 600; }
+  .meta.danger { color: var(--red); font-weight: 600; }
+  .card-actions { display: flex; gap: 6px; margin-top: 9px; }
+  .card-actions .btn { flex: 1; }
+  .card-actions .icon-btn { flex: none; }
+
+  .empty {
+    border: 1px dashed var(--line-strong); border-radius: var(--radius);
+    background: var(--surface); padding: 52px 20px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 7px;
+  }
+  .empty-icon {
+    width: 62px; height: 62px; border-radius: 20px; display: grid; place-items: center;
+    background: var(--brand-soft); color: var(--brand); margin-bottom: 4px;
+  }
+  .empty h2 { font-size: 17px; }
+  .empty p { font-size: 13.5px; color: var(--muted); max-width: 38ch; }
+
+  footer {
+    max-width: 480px; margin: 30px auto 0; padding: 20px 18px 30px;
+    border-top: 1px solid var(--line); color: var(--muted); font-size: 12px;
+    display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between;
+  }
+  .footer-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  dialog {
+    border: 0; padding: 0; background: transparent; color: var(--ink);
+    max-width: 100vw; max-height: 100dvh;
+  }
+  dialog::backdrop { background: rgba(27,25,23,.52); backdrop-filter: blur(3px); }
+  .modal {
+    width: min(94vw, 440px); max-height: 90dvh; overflow: auto;
+    background: var(--surface); border-radius: 22px; padding: 20px;
+    box-shadow: 0 24px 70px rgba(27,25,23,.28);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .modal-head h2 { font-size: 19px; letter-spacing: -.02em; }
+  .modal-head p { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12.5px; font-weight: 700; color: #3f3b35; }
+  .field label span { color: var(--muted); font-weight: 500; }
+  .field input, .field textarea {
+    width: 100%; border: 1px solid var(--line-strong); border-radius: 11px;
+    padding: 10px 12px; font-size: 16px; background: #fff;
+  }
+  .field textarea { resize: vertical; min-height: 64px; }
+  .field input:focus, .field textarea:focus {
+    outline: none; border-color: var(--brand); box-shadow: 0 0 0 4px rgba(208,73,42,.1);
+  }
+  .field input[aria-invalid="true"] { border-color: var(--red); }
+
+  .drop {
+    position: relative; border: 1.5px dashed var(--line-strong); border-radius: 16px;
+    min-height: 150px; display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 6px; text-align: center; background: #fdfcf9;
+    overflow: hidden; transition: border-color .15s, background .15s;
+  }
+  .drop:hover, .drop.over { border-color: var(--brand); background: #fff9f6; }
+  .drop input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .drop img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; }
+  .drop .drop-hint { color: var(--muted); font-size: 12.5px; padding: 0 16px; z-index: 1; }
+  .drop .drop-icon {
+    width: 44px; height: 44px; border-radius: 14px; background: var(--brand-soft);
+    color: var(--brand); display: grid; place-items: center;
+  }
+
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 2px; }
+  .notice {
+    border-radius: 11px; padding: 9px 11px; font-size: 12.5px;
+    background: var(--green-soft); color: #14523b; border: 1px solid rgba(29,107,78,.14);
+  }
+  .notice.error { background: var(--red-soft); color: #7f1d16; border-color: rgba(176,42,32,.14); }
+
+  /* viewer */
+  .viewer {
+    width: min(94vw, 440px); max-height: 92dvh; overflow: auto;
+    background: var(--surface); border-radius: 22px; padding: 16px;
+    display: flex; flex-direction: column; gap: 12px;
+    box-shadow: 0 24px 70px rgba(27,25,23,.3);
+  }
+  .viewer-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .viewer-top h2 { font-size: 19px; line-height: 1.3; letter-spacing: -.02em; }
+  .viewer-img {
+    width: 100%; max-height: 62dvh; object-fit: contain; border-radius: 14px;
+    background: #f1eee8; border: 1px solid var(--line);
+  }
+  .viewer-note { font-size: 13px; color: var(--muted); white-space: pre-wrap; }
+  .viewer-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .viewer-actions .grow { flex: 1; min-width: 130px; }
+
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(12px);
+    background: #231f1b; color: #fff; padding: 10px 16px; border-radius: 999px;
+    font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+    z-index: 50; box-shadow: 0 10px 30px rgba(0,0,0,.25); max-width: 90vw;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* มือถือเท่านั้น: คงการ์ดคอลัมน์เดียวแม้เปิดบนจอกว้าง */
+  @media (max-width: 420px) {
+    .brand-text span { display: none; }
+    .page { padding-left: 14px; padding-right: 14px; }
+    .header-inner { padding-left: 14px; padding-right: 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 8.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.2a2.3 2.3 0 0 0 0 4.6v1.2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.2a2.3 2.3 0 0 0 0-4.6Z"/>
+          <path d="M15 6.5v11" stroke-dasharray="2 2.4"/>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <strong>Coupon Wallet</strong>
+        <span>เก็บคูปองง่าย ๆ</span>
+      </span>
+    </div>
+    <button class="btn btn-primary" id="addBtn" type="button">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      เพิ่มคูปอง
+    </button>
+  </div>
+</header>
+
+<main class="page">
+  <div class="intro">
+    <h1>คูปองของฉัน</h1>
+    <p>เก็บรูปคูปองไว้ที่เดียว เปิดดูได้ทุกเมื่อ และกดใช้แล้วเพื่อไม่ให้หยิบผิดใบ</p>
+  </div>
+
+  <div class="toolbar">
+    <div class="tabs" role="group" aria-label="กรองคูปอง">
+      <button class="tab" type="button" data-tab="all" aria-pressed="true">ทั้งหมด <b id="countAll">0</b></button>
+      <button class="tab" type="button" data-tab="unused" aria-pressed="false">ยังไม่ใช้ <b id="countUnused">0</b></button>
+      <button class="tab" type="button" data-tab="used" aria-pressed="false">ใช้แล้ว <b id="countUsed">0</b></button>
+    </div>
+    <div class="search">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+      <input id="search" type="search" placeholder="ค้นหาชื่อคูปองหรือร้านค้า…" autocomplete="off" aria-label="ค้นหาคูปอง">
+    </div>
+  </div>
+
+  <div class="count-line">
+    <span id="resultLine">0 ใบ</span>
+    <span id="warnLine"></span>
+  </div>
+
+  <section id="grid" class="grid" aria-live="polite"></section>
+
+  <section id="empty" class="empty" hidden>
+    <span class="empty-icon" aria-hidden="true">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 8.5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1.2a2.3 2.3 0 0 0 0 4.6v1.2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1.2a2.3 2.3 0 0 0 0-4.6Z"/>
+        <path d="M15 6.5v11" stroke-dasharray="2 2.4"/>
+      </svg>
+    </span>
+    <h2 id="emptyTitle">ยังไม่มีคูปอง</h2>
+    <p id="emptyText">อัปโหลด Screenshot คูปองใบแรกได้เลย — เก็บไว้ในเบราว์เซอร์นี้ ไม่ต้องสมัครอะไร</p>
+    <button class="btn btn-primary" type="button" style="margin-top:8px" id="emptyAddBtn">เพิ่มคูปอง</button>
+  </section>
+
+  <footer>
+    <span>ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น · แนะนำสำรองไว้เป็นครั้งคราว</span>
+    <span class="footer-actions">
+      <button class="btn btn-ghost btn-sm" type="button" id="exportBtn">สำรองข้อมูล</button>
+      <button class="btn btn-ghost btn-sm" type="button" id="importBtn">นำเข้า</button>
+      <input type="file" id="importFile" accept="application/json,.json" hidden>
+    </span>
+  </footer>
+</main>
+
+<!-- เพิ่มคูปอง -->
+<dialog id="addDialog">
+  <form class="modal" id="addForm">
+    <div class="modal-head">
+      <div>
+        <h2>เพิ่มคูปอง</h2>
+        <p>ใส่รูป ตั้งชื่อ แล้วกดบันทึก</p>
+      </div>
+      <button class="icon-btn" type="button" data-close="addDialog" aria-label="ปิด">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="drop" id="drop">
+      <input type="file" id="fileInput" accept="image/*" aria-label="เลือกรูปคูปอง">
+      <span class="drop-icon" aria-hidden="true">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4.5M7.5 9 12 4.5 16.5 9"/><path d="M4.5 15v3A2.5 2.5 0 0 0 7 20.5h10a2.5 2.5 0 0 0 2.5-2.5v-3"/></svg>
+      </span>
+      <span class="drop-hint" id="dropHint">แตะเพื่อเลือกรูป หรือลากรูปมาวาง<br>(วางจาก clipboard ได้)</span>
+      <img id="preview" alt="" hidden>
+    </div>
+
+    <button class="btn btn-secondary" type="button" id="cameraBtn" style="width:100%">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4.5 8.5h2.7l1.4-2.2h6.8l1.4 2.2h2.7A1.5 1.5 0 0 1 21 10v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18v-8a1.5 1.5 0 0 1 1.5-1.5Z"/>
+        <circle cx="12" cy="13.7" r="3.4"/>
+      </svg>
+      ถ่ายรูป
+    </button>
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" hidden>
+
+    <div class="field">
+      <label for="name">ชื่อคูปอง <span>(จำเป็น)</span></label>
+      <input id="name" maxlength="100" placeholder="เช่น Shopee ลด 50 บาท" autocomplete="off" aria-invalid="false">
+    </div>
+
+    <div class="field">
+      <label for="expiry">วันหมดอายุ <span>(ไม่บังคับ)</span></label>
+      <input id="expiry" type="date">
+    </div>
+
+    <div class="field">
+      <label for="note">บันทึกเพิ่มเติม <span>(ไม่บังคับ)</span></label>
+      <textarea id="note" maxlength="300" placeholder="เช่น ใช้กับบิลนี้เท่านั้น / ต้องแสดงหน้าร้าน"></textarea>
+    </div>
+
+    <p class="notice error" id="formError" hidden></p>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" type="button" data-close="addDialog">ยกเลิก</button>
+      <button class="btn btn-primary" type="submit" id="saveBtn">บันทึก</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ดูคูปอง -->
+<dialog id="viewDialog">
+  <div class="viewer">
+    <div class="viewer-top">
+      <div>
+        <h2 id="viewName"></h2>
+        <p class="meta" id="viewMeta" style="font-size:12.5px;color:var(--muted)"></p>
+      </div>
+      <button class="icon-btn" type="button" data-close="viewDialog" aria-label="ปิด">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <img class="viewer-img" id="viewImage" alt="รูปคูปอง">
+    <p class="viewer-note" id="viewNote"></p>
+    <div class="viewer-actions">
+      <button class="btn btn-primary grow" type="button" id="toggleUsedBtn"></button>
+      <button class="btn btn-secondary" type="button" id="editBtn">แก้ไข</button>
+      <button class="btn btn-danger" type="button" id="deleteBtn">ลบ</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var DB_NAME = 'coupon-wallet-simple';
+  var STORE = 'coupons';
+  var NEAR_DAYS = 3;
+
+  var state = {
+    items: [],
+    tab: 'all',
+    query: '',
+    pendingBlob: null,
+    previewUrl: '',
+    viewId: null,
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var grid = $('grid');
+  var empty = $('empty');
+  var toastTimer = null;
+  var imageUrls = new Map();
+
+  function imageSrc(item) {
+    if (item.imageBlob) {
+      var url = imageUrls.get(item.id);
+      if (!url) {
+        url = URL.createObjectURL(item.imageBlob);
+        imageUrls.set(item.id, url);
+      }
+      return url;
+    }
+    return item.image || '';
+  }
+
+  function revokeImage(id) {
+    var url = imageUrls.get(id);
+    if (url) {
+      URL.revokeObjectURL(url);
+      imageUrls.delete(id);
+    }
+  }
+
+  function clearPreview() {
+    if (state.previewUrl) {
+      URL.revokeObjectURL(state.previewUrl);
+      state.previewUrl = '';
+    }
+    state.pendingBlob = null;
+    var preview = $('preview');
+    preview.removeAttribute('src');
+    preview.hidden = true;
+    $('dropHint').style.display = '';
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* IndexedDB                                                            */
+  /* ------------------------------------------------------------------ */
+
+  function openDb() {
+    return new Promise(function (resolve, reject) {
+      if (!('indexedDB' in window)) {
+        reject(new Error('เบราว์เซอร์นี้ไม่รองรับการเก็บข้อมูล'));
+        return;
+      }
+      var request = indexedDB.open(DB_NAME, 1);
+      request.onupgradeneeded = function () {
+        var db = request.result;
+        if (!db.objectStoreNames.contains(STORE)) {
+          db.createObjectStore(STORE, { keyPath: 'id' });
+        }
+      };
+      request.onsuccess = function () { resolve(request.result); };
+      request.onerror = function () { reject(request.error); };
+    });
+  }
+
+  function requestResult(request) {
+    return new Promise(function (resolve, reject) {
+      request.onsuccess = function () { resolve(request.result); };
+      request.onerror = function () { reject(request.error); };
+    });
+  }
+
+  async function dbGetAll() {
+    var db = await openDb();
+    return requestResult(db.transaction(STORE, 'readonly').objectStore(STORE).getAll());
+  }
+
+  async function dbPut(item) {
+    var db = await openDb();
+    var store = db.transaction(STORE, 'readwrite').objectStore(STORE);
+    await requestResult(store.put(item));
+  }
+
+  async function dbDelete(id) {
+    var db = await openDb();
+    var store = db.transaction(STORE, 'readwrite').objectStore(STORE);
+    await requestResult(store.delete(id));
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Helpers                                                              */
+  /* ------------------------------------------------------------------ */
+
+  function uuid() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+    return 'c-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9);
+  }
+
+  function todayStr() {
+    var now = new Date();
+    return [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0'),
+    ].join('-');
+  }
+
+  function daysUntil(dateStr) {
+    if (!dateStr) return null;
+    var target = Date.parse(dateStr + 'T00:00:00Z');
+    var today = Date.parse(todayStr() + 'T00:00:00Z');
+    if (isNaN(target)) return null;
+    return Math.round((target - today) / 86400000);
+  }
+
+  function thaiDate(dateStr) {
+    if (!dateStr) return '';
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+    if (!m) return dateStr;
+    var months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+    return Number(m[3]) + ' ' + months[Number(m[2]) - 1] + ' ' + m[1];
+  }
+
+  function statusOf(item) {
+    if (item.used) return { key: 'used', label: 'ใช้แล้ว', className: 'used' };
+    var days = daysUntil(item.expiryDate);
+    if (days === null) return { key: 'unused', label: 'ยังไม่ใช้', className: '' };
+    if (days < 0) return { key: 'expired', label: 'หมดอายุ', className: 'expired' };
+    if (days <= NEAR_DAYS) {
+      return { key: 'expiring', label: days === 0 ? 'หมดอายุวันนี้' : 'เหลือ ' + days + ' วัน', className: 'expiring' };
+    }
+    return { key: 'unused', label: 'ยังไม่ใช้', className: '' };
+  }
+
+  function expiryLine(item) {
+    if (!item.expiryDate) return { text: 'ไม่มีวันหมดอายุ', className: '' };
+    var days = daysUntil(item.expiryDate);
+    if (item.used) return { text: 'ใช้แล้ว', className: '' };
+    if (days === null) return { text: thaiDate(item.expiryDate), className: '' };
+    if (days < 0) return { text: 'หมดอายุ ' + thaiDate(item.expiryDate), className: 'danger' };
+    if (days === 0) return { text: 'หมดอายุวันนี้', className: 'danger' };
+    if (days <= NEAR_DAYS) return { text: 'เหลือ ' + days + ' วัน', className: 'warn' };
+    return { text: 'ถึง ' + thaiDate(item.expiryDate), className: '' };
+  }
+
+  function rankOf(item) {
+    if (item.used) return 3;
+    var days = daysUntil(item.expiryDate);
+    if (days === null) return 1;
+    if (days < 0) return 2;
+    return days <= NEAR_DAYS ? 0 : 1;
+  }
+
+  function sorted(items) {
+    return items.slice().sort(function (a, b) {
+      var diff = rankOf(a) - rankOf(b);
+      if (diff !== 0) return diff;
+      if (a.used && b.used) return String(b.usedAt || '').localeCompare(String(a.usedAt || ''));
+      if (a.expiryDate && b.expiryDate) {
+        var byDate = a.expiryDate.localeCompare(b.expiryDate);
+        if (byDate !== 0) return byDate;
+      } else if (a.expiryDate !== b.expiryDate) {
+        return a.expiryDate ? -1 : 1;
+      }
+      return String(b.createdAt).localeCompare(String(a.createdAt));
+    });
+  }
+
+  function visibleItems() {
+    var query = state.query.trim().toLowerCase();
+    return sorted(state.items.filter(function (item) {
+      if (state.tab === 'unused' && item.used) return false;
+      if (state.tab === 'used' && !item.used) return false;
+      if (!query) return true;
+      return (item.name + ' ' + (item.note || '')).toLowerCase().indexOf(query) !== -1;
+    }));
+  }
+
+  function showToast(message) {
+    var toast = $('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2400);
+  }
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Rendering                                                            */
+  /* ------------------------------------------------------------------ */
+
+  function render() {
+    var items = visibleItems();
+    var unused = state.items.filter(function (item) { return !item.used; }).length;
+    var used = state.items.length - unused;
+
+    $('countAll').textContent = String(state.items.length);
+    $('countUnused').textContent = String(unused);
+    $('countUsed').textContent = String(used);
+    $('resultLine').textContent = state.query
+      ? 'ผลการค้นหา “' + state.query + '” · ' + items.length + ' ใบ'
+      : items.length + ' ใบ';
+
+    var expiring = state.items.filter(function (item) {
+      return !item.used && item.expiryDate && daysUntil(item.expiryDate) !== null &&
+        daysUntil(item.expiryDate) >= 0 && daysUntil(item.expiryDate) <= NEAR_DAYS;
+    }).length;
+    $('warnLine').textContent = expiring > 0 ? 'ใกล้หมดอายุ ' + expiring + ' ใบ' : '';
+
+    grid.innerHTML = items.map(function (item) {
+      var status = statusOf(item);
+      var expiry = expiryLine(item);
+      return '' +
+        '<article class="card' + (item.used ? ' is-used' : '') + '" data-id="' + item.id + '">' +
+          '<button class="thumb" type="button" data-open="' + item.id + '" aria-label="ดูรูป ' + escapeHtml(item.name) + '">' +
+            '<img src="' + escapeHtml(imageSrc(item)) + '" alt="" loading="lazy">' +
+            '<span class="badge ' + status.className + '">' + status.label + '</span>' +
+          '</button>' +
+          '<div class="card-body">' +
+            '<h3>' + escapeHtml(item.name) + '</h3>' +
+            '<p class="meta ' + expiry.className + '">' + escapeHtml(expiry.text) + '</p>' +
+            '<div class="card-actions">' +
+              '<button class="btn ' + (item.used ? 'btn-secondary' : 'btn-primary') + ' btn-sm" type="button" data-toggle="' + item.id + '">' +
+                (item.used ? 'ยกเลิกใช้แล้ว' : 'ใช้แล้ว') +
+              '</button>' +
+              '<button class="icon-btn" type="button" data-delete="' + item.id + '" aria-label="ลบคูปอง ' + escapeHtml(item.name) + '">' +
+                '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+                  '<path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l.8 12.2A1.8 1.8 0 0 0 9.1 21h5.8a1.8 1.8 0 0 0 1.8-1.8L17.5 7"/>' +
+                '</svg>' +
+              '</button>' +
+            '</div>' +
+          '</div>' +
+        '</article>';
+    }).join('');
+
+    empty.hidden = items.length > 0;
+    if (items.length === 0) {
+      if (state.items.length === 0) {
+        $('emptyTitle').textContent = 'ยังไม่มีคูปอง';
+        $('emptyText').textContent = 'อัปโหลด Screenshot คูปองใบแรกได้เลย — เก็บไว้ในเบราว์เซอร์นี้ ไม่ต้องสมัครอะไร';
+      } else if (state.query) {
+        $('emptyTitle').textContent = 'ไม่พบคูปองที่ค้นหา';
+        $('emptyText').textContent = 'ลองใช้คำค้นที่สั้นลง หรือเปลี่ยนแท็บสถานะ';
+      } else {
+        $('emptyTitle').textContent = state.tab === 'used' ? 'ยังไม่มีคูปองที่ใช้แล้ว' : 'ไม่มีคูปองในหมวดนี้';
+        $('emptyText').textContent = 'เมื่อกด “ใช้แล้ว” คูปองจะย้ายไปอยู่แท็บที่เกี่ยวข้อง';
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Image handling                                                       */
+  /* ------------------------------------------------------------------ */
+
+  function canvasToBlob(canvas, type, quality) {
+    return new Promise(function (resolve) {
+      if (typeof canvas.toBlob !== 'function') {
+        var dataUrl = canvas.toDataURL(type, quality);
+        resolve(dataUrlToBlob(dataUrl));
+        return;
+      }
+      canvas.toBlob(function (blob) { resolve(blob); }, type, quality);
+    });
+  }
+
+  async function encodeCanvas(source) {
+    var blob = await canvasToBlob(source, 'image/webp', 0.82);
+    if (!blob || blob.type !== 'image/webp') {
+      blob = await canvasToBlob(source, 'image/jpeg', 0.85);
+    }
+    return blob;
+  }
+
+  function compressImage(file) {
+    return new Promise(function (resolve, reject) {
+      if (!file || !file.type || file.type.indexOf('image/') !== 0) {
+        reject(new Error('กรุณาเลือกรูปภาพ'));
+        return;
+      }
+      if (file.size > 12 * 1024 * 1024) {
+        reject(new Error('รูปใหญ่เกิน 12 MB กรุณาใช้รูปที่เล็กลง'));
+        return;
+      }
+
+      var url = URL.createObjectURL(file);
+      var image = new Image();
+      image.onload = async function () {
+        try {
+          var maxEdge = 1280;
+          var targetBytes = 600 * 1024;
+          var scale = Math.min(1, maxEdge / Math.max(image.width, image.height));
+          var canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(image.width * scale));
+          canvas.height = Math.max(1, Math.round(image.height * scale));
+          var context = canvas.getContext('2d');
+          context.fillStyle = '#ffffff';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+
+          function shrink(source) {
+            var next = document.createElement('canvas');
+            next.width = Math.max(1, Math.round(source.width * 0.84));
+            next.height = Math.max(1, Math.round(source.height * 0.84));
+            var ctx = next.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, next.width, next.height);
+            ctx.drawImage(source, 0, 0, next.width, next.height);
+            return next;
+          }
+
+          var working = canvas;
+          var blob = await encodeCanvas(working);
+          var attempts = 0;
+          while (blob && blob.size > targetBytes && attempts < 2) {
+            attempts += 1;
+            working = shrink(working);
+            blob = await encodeCanvas(working);
+          }
+          if (!blob) throw new Error('แปลงรูปไม่สำเร็จ');
+          resolve(blob);
+        } catch (cause) {
+          URL.revokeObjectURL(url);
+          reject(cause);
+        }
+      };
+      image.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error('เปิดรูปนี้ไม่ได้ กรุณาลองรูปอื่น'));
+      };
+      image.src = url;
+    });
+  }
+
+  function setPreviewBlob(blob) {
+    clearPreview();
+    state.pendingBlob = blob;
+    var url = URL.createObjectURL(blob);
+    state.previewUrl = url;
+    var preview = $('preview');
+    preview.src = url;
+    preview.hidden = false;
+    $('dropHint').style.display = 'none';
+  }
+
+  function setPreviewExisting(item) {
+    clearPreview();
+    if (!item) return;
+    var url = imageSrc(item);
+    if (!url) return;
+    var preview = $('preview');
+    preview.src = url;
+    preview.hidden = false;
+    $('dropHint').style.display = 'none';
+  }
+
+  function dataUrlToBlob(dataUrl) {
+    var parts = dataUrl.split(',');
+    var match = /data:([^;]+);base64/.exec(parts[0]);
+    var mime = match ? match[1] : 'image/jpeg';
+    var binary = atob(parts[1] || '');
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: mime });
+  }
+
+  function blobToDataUrl(blob) {
+    return new Promise(function (resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function () { resolve(String(reader.result)); };
+      reader.onerror = function () { reject(reader.error); };
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  function base64ToBlob(base64, mime) {
+    var binary = atob(base64);
+    var bytes = new Uint8Array(binary.length);
+    for (var i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: mime || 'image/jpeg' });
+  }
+
+  function openAddDialog(existingItem) {
+    state.editingId = existingItem ? existingItem.id : null;
+    $('addForm').reset();
+    clearPreview();
+    $('formError').hidden = true;
+    $('fileInput').value = '';
+    $('cameraInput').value = '';
+    $('name').setAttribute('aria-invalid', 'false');
+    if (existingItem) setPreviewExisting(existingItem);
+    $('addDialog').showModal();
+    setTimeout(function () { $('name').focus(); }, 60);
+  }
+
+  function closeDialog(id) {
+    var dialog = $(id);
+    if (dialog && dialog.open) dialog.close();
+  }
+
+  function openViewer(id) {
+    var item = state.items.find(function (entry) { return entry.id === id; });
+    if (!item) return;
+
+    state.viewId = id;
+    $('viewName').textContent = item.name;
+    $('viewImage').src = imageSrc(item);
+    $('viewImage').alt = 'รูปคูปอง ' + item.name;
+    var expiry = expiryLine(item);
+    $('viewMeta').textContent = item.expiryDate ? expiry.text + ' · ' + thaiDate(item.expiryDate) : 'ไม่มีวันหมดอายุ';
+    $('viewNote').textContent = item.note || '';
+    $('viewNote').hidden = !item.note;
+    $('toggleUsedBtn').textContent = item.used ? 'ยกเลิกใช้แล้ว' : 'ใช้แล้ว';
+    $('toggleUsedBtn').className = 'btn grow ' + (item.used ? 'btn-secondary' : 'btn-primary');
+    if (!$('viewDialog').open) $('viewDialog').showModal();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Actions                                                              */
+  /* ------------------------------------------------------------------ */
+
+  async function saveNew(event) {
+    event.preventDefault();
+    var name = $('name').value.trim();
+    var error = '';
+    if (!state.pendingBlob) error = 'กรุณาแนบรูปคูปอง';
+    else if (!name) error = 'กรุณาตั้งชื่อคูปอง';
+
+    if (error) {
+      $('formError').textContent = error;
+      $('formError').hidden = false;
+      if (!name) $('name').setAttribute('aria-invalid', 'true');
+      return;
+    }
+
+    var saveBtn = $('saveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'กำลังบันทึก…';
+
+    try {
+      var item = {
+        id: uuid(),
+        name: name,
+        expiryDate: $('expiry').value || '',
+        note: $('note').value.trim(),
+        imageBlob: state.pendingBlob,
+        used: false,
+        usedAt: '',
+        createdAt: new Date().toISOString(),
+      };
+      await dbPut(item);
+      state.items.push(item);
+      closeDialog('addDialog');
+      render();
+      showToast('เก็บคูปองแล้ว');
+    } catch (cause) {
+      $('formError').textContent = 'บันทึกไม่สำเร็จ: ' + cause.message;
+      $('formError').hidden = false;
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'บันทึก';
+    }
+  }
+
+  async function toggleUsed(id) {
+    var item = state.items.find(function (entry) { return entry.id === id; });
+    if (!item) return;
+
+    item.used = !item.used;
+    item.usedAt = item.used ? new Date().toISOString() : '';
+
+    try {
+      await dbPut(item);
+      render();
+      if (state.viewId === id && $('viewDialog').open) openViewer(id);
+      showToast(item.used ? 'ทำเครื่องหมายว่าใช้แล้ว' : 'เปลี่ยนกลับเป็นยังไม่ใช้');
+    } catch (cause) {
+      item.used = !item.used;
+      item.usedAt = item.used ? new Date().toISOString() : '';
+      showToast('บันทึกไม่สำเร็จ: ' + cause.message);
+    }
+  }
+
+  async function removeCoupon(id) {
+    var item = state.items.find(function (entry) { return entry.id === id; });
+    if (!item) return;
+    if (!window.confirm('ลบคูปอง “' + item.name + '” ออกจากรายการ?')) return;
+
+    try {
+      await dbDelete(id);
+      revokeImage(id);
+      state.items = state.items.filter(function (entry) { return entry.id !== id; });
+      if (state.viewId === id) closeDialog('viewDialog');
+      render();
+      showToast('ลบคูปองแล้ว');
+    } catch (cause) {
+      showToast('ลบไม่สำเร็จ: ' + cause.message);
+    }
+  }
+
+  function editCoupon(id) {
+    var item = state.items.find(function (entry) { return entry.id === id; });
+    if (!item) return;
+
+    closeDialog('viewDialog');
+    openAddDialog(item);
+    $('name').value = item.name;
+    $('expiry').value = item.expiryDate || '';
+    $('note').value = item.note || '';
+    $('saveBtn').textContent = 'บันทึกการแก้ไข';
+    $('addDialog').querySelector('h2').textContent = 'แก้ไขคูปอง';
+    $('addDialog').querySelector('.modal-head p').textContent = 'แก้ชื่อ วันหมดอายุ หรือบันทึกเพิ่มเติม';
+  }
+
+  async function saveEdit(event) {
+    event.preventDefault();
+    var id = state.editingId;
+    if (!id) return;
+
+    var name = $('name').value.trim();
+    if (!name) {
+      $('formError').textContent = 'กรุณาตั้งชื่อคูปอง';
+      $('formError').hidden = false;
+      $('name').setAttribute('aria-invalid', 'true');
+      return;
+    }
+
+    var item = state.items.find(function (entry) { return entry.id === id; });
+    if (!item) return;
+
+    item.name = name;
+    item.expiryDate = $('expiry').value || '';
+    item.note = $('note').value.trim();
+    if (state.pendingBlob) {
+      revokeImage(id);
+      item.imageBlob = state.pendingBlob;
+      delete item.image;
+    }
+
+    try {
+      await dbPut(item);
+      closeDialog('addDialog');
+      render();
+      showToast('แก้ไขแล้ว');
+    } catch (cause) {
+      $('formError').textContent = 'บันทึกไม่สำเร็จ: ' + cause.message;
+      $('formError').hidden = false;
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Backup                                                               */
+  /* ------------------------------------------------------------------ */
+
+  async function exportData() {
+    showToast('กำลังเตรียมไฟล์สำรอง…');
+    var coupons = [];
+
+    for (var i = 0; i < state.items.length; i += 1) {
+      var item = state.items[i];
+      var dataUrl = '';
+      if (item.imageBlob) {
+        dataUrl = await blobToDataUrl(item.imageBlob);
+      } else if (item.image && item.image.indexOf('data:') === 0) {
+        dataUrl = item.image;
+      }
+
+      var comma = dataUrl.indexOf(',');
+      var mimeMatch = /data:([^;]+);base64/.exec(dataUrl.slice(0, comma));
+      coupons.push({
+        id: item.id,
+        name: item.name,
+        expiryDate: item.expiryDate || '',
+        note: item.note || '',
+        used: Boolean(item.used),
+        usedAt: item.usedAt || '',
+        createdAt: item.createdAt,
+        imageBase64: comma >= 0 ? dataUrl.slice(comma + 1) : '',
+        imageMimeType: mimeMatch ? mimeMatch[1] : '',
+        image: comma < 0 && item.image ? item.image : ''
+      });
+    }
+
+    var payload = {
+      app: 'coupon-wallet-simple',
+      version: 2,
+      exportedAt: new Date().toISOString(),
+      coupons: coupons,
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'coupons-backup-' + todayStr() + '.json';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(function () { URL.revokeObjectURL(link.href); }, 3000);
+    showToast('ดาวน์โหลดไฟล์สำรองแล้ว');
+  }
+
+  async function importData(file) {
+    if (!file) return;
+    try {
+      var text = await file.text();
+      var parsed = JSON.parse(text);
+      var coupons = Array.isArray(parsed) ? parsed : parsed.coupons;
+      if (!Array.isArray(coupons) || coupons.length === 0) throw new Error('ไม่พบข้อมูลคูปองในไฟล์');
+
+      var valid = coupons.filter(function (item) {
+        if (!item || typeof item.name !== 'string') return false;
+        if (typeof item.imageBase64 === 'string' && item.imageBase64) return true;
+        return typeof item.image === 'string' && item.image.length > 0;
+      });
+      if (valid.length === 0) throw new Error('ไฟล์ไม่ถูกต้อง');
+
+      if (!window.confirm('นำเข้าคูปอง ' + valid.length + ' ใบ? รายการที่มีอยู่จะไม่ถูกแทนที่')) return;
+
+      var existing = new Set(state.items.map(function (item) { return item.id; }));
+      for (var i = 0; i < valid.length; i += 1) {
+        var source = valid[i];
+        var id = source.id;
+        if (!id || existing.has(id) || !/^[A-Za-z0-9_-]{1,64}$/.test(String(id))) {
+          id = uuid();
+        }
+
+        var record = {
+          id: id,
+          name: String(source.name),
+          expiryDate: source.expiryDate || '',
+          note: source.note || '',
+          used: Boolean(source.used),
+          usedAt: source.used ? (source.usedAt || '') : '',
+          createdAt: source.createdAt || new Date().toISOString(),
+        };
+
+        if (typeof source.imageBase64 === 'string' && source.imageBase64) {
+          record.imageBlob = base64ToBlob(source.imageBase64, source.imageMimeType || 'image/jpeg');
+        } else if (typeof source.image === 'string' && source.image.indexOf('data:') === 0) {
+          record.imageBlob = dataUrlToBlob(source.image);
+        } else if (typeof source.image === 'string' && source.image) {
+          record.image = source.image;
+        } else {
+          continue;
+        }
+
+        state.items.push(record);
+        existing.add(id);
+        await dbPut(record);
+      }
+      render();
+      showToast('นำเข้าคูปอง ' + valid.length + ' ใบแล้ว');
+    } catch (cause) {
+      showToast('นำเข้าไม่สำเร็จ: ' + cause.message);
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Events                                                               */
+  /* ------------------------------------------------------------------ */
+
+  $('addBtn').addEventListener('click', function () { openAddDialog(null); });
+  $('emptyAddBtn').addEventListener('click', function () { openAddDialog(null); });
+
+  async function handlePickedFile(file, autoName) {
+    if (!file) return;
+    try {
+      var blob = await compressImage(file);
+      setPreviewBlob(blob);
+      $('formError').hidden = true;
+      if (autoName !== false && !$('name').value.trim()) {
+        var base = file.name.replace(/\.[^.]+$/, '').replace(/[_]+/g, ' ').trim();
+        if (base && !/^screenshot|^img_|^photo/i.test(base)) $('name').value = base.slice(0, 100);
+      }
+      $('name').focus();
+    } catch (cause) {
+      $('formError').textContent = cause.message;
+      $('formError').hidden = false;
+    }
+  }
+
+  $('fileInput').addEventListener('change', function () {
+    handlePickedFile(this.files && this.files[0]);
+    this.value = '';
+  });
+
+  $('cameraBtn').addEventListener('click', function () { $('cameraInput').click(); });
+  $('cameraInput').addEventListener('change', function () {
+    var file = this.files && this.files[0];
+    if (file) {
+      // ไฟล์จากกล้องมักมีชื่อไม่สื่อความหมาย — ใช้ชื่อไฟล์เฉพาะเมื่อมีจริง
+      handlePickedFile(file, false);
+    }
+    this.value = '';
+  });
+
+  var drop = $('drop');
+  ['dragenter', 'dragover'].forEach(function (name) {
+    drop.addEventListener(name, function (event) {
+      event.preventDefault();
+      drop.classList.add('over');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (name) {
+    drop.addEventListener(name, function (event) {
+      event.preventDefault();
+      drop.classList.remove('over');
+    });
+  });
+  drop.addEventListener('drop', async function (event) {
+    var file = event.dataTransfer.files && event.dataTransfer.files[0];
+    if (!file) return;
+    try {
+      setPreviewBlob(await compressImage(file));
+      $('formError').hidden = true;
+    } catch (cause) {
+      $('formError').textContent = cause.message;
+      $('formError').hidden = false;
+    }
+  });
+
+  document.addEventListener('paste', async function (event) {
+    var file = Array.from((event.clipboardData && event.clipboardData.files) || [])[0];
+    if (!file || file.type.indexOf('image/') !== 0) return;
+    event.preventDefault();
+
+    if (!$('addDialog').open) openAddDialog(null);
+    try {
+      setPreviewBlob(await compressImage(file));
+      $('formError').hidden = true;
+    } catch (cause) {
+      $('formError').textContent = cause.message;
+      $('formError').hidden = false;
+    }
+  });
+
+  $('addForm').addEventListener('submit', function (event) {
+    if (state.editingId) saveEdit(event);
+    else saveNew(event);
+  });
+
+  document.querySelectorAll('[data-close]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      closeDialog(button.getAttribute('data-close'));
+    });
+  });
+
+  document.querySelectorAll('dialog').forEach(function (dialog) {
+    dialog.addEventListener('click', function (event) {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('close', function () {
+      if (dialog.id === 'addDialog') {
+        state.editingId = null;
+        clearPreview();
+        $('addDialog').querySelector('h2').textContent = 'เพิ่มคูปอง';
+        $('addDialog').querySelector('.modal-head p').textContent = 'ใส่รูป ตั้งชื่อ แล้วกดบันทึก';
+        $('saveBtn').textContent = 'บันทึก';
+      }
+      if (dialog.id === 'viewDialog') state.viewId = null;
+    });
+  });
+
+  document.querySelectorAll('.tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      state.tab = tab.getAttribute('data-tab');
+      document.querySelectorAll('.tab').forEach(function (other) {
+        other.setAttribute('aria-pressed', String(other === tab));
+      });
+      render();
+    });
+  });
+
+  $('search').addEventListener('input', function () {
+    state.query = this.value;
+    render();
+  });
+
+  grid.addEventListener('click', function (event) {
+    var target = event.target.closest('[data-open], [data-toggle], [data-delete]');
+    if (!target) return;
+    var id = target.getAttribute('data-open') || target.getAttribute('data-toggle') || target.getAttribute('data-delete');
+    if (target.hasAttribute('data-open')) openViewer(id);
+    else if (target.hasAttribute('data-toggle')) toggleUsed(id);
+    else removeCoupon(id);
+  });
+
+  $('toggleUsedBtn').addEventListener('click', function () {
+    if (state.viewId) toggleUsed(state.viewId);
+  });
+  $('editBtn').addEventListener('click', function () {
+    if (state.viewId) editCoupon(state.viewId);
+  });
+  $('deleteBtn').addEventListener('click', function () {
+    if (state.viewId) removeCoupon(state.viewId);
+  });
+
+  $('exportBtn').addEventListener('click', exportData);
+  $('importBtn').addEventListener('click', function () { $('importFile').click(); });
+  $('importFile').addEventListener('change', function () {
+    importData(this.files && this.files[0]);
+    this.value = '';
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* Boot                                                                 */
+  /* ------------------------------------------------------------------ */
+
+  (async function boot() {
+    try {
+      state.items = await dbGetAll();
+
+      // แปลงข้อมูลรุ่นเก่าที่เก็บ data URL เป็น Blob
+      for (var i = 0; i < state.items.length; i += 1) {
+        var item = state.items[i];
+        if (!item.imageBlob && typeof item.image === 'string' && item.image.indexOf('data:image/') === 0) {
+          try {
+            item.imageBlob = dataUrlToBlob(item.image);
+            delete item.image;
+            await dbPut(item);
+          } catch (ignored) {
+            /* เก็บข้อมูลเดิมไว้ถ้าแปลงไม่ได้ */
+          }
+        }
+      }
+
+      render();
+    } catch (cause) {
+      $('emptyTitle').textContent = 'เปิดใช้งานที่เก็บข้อมูลไม่ได้';
+      $('emptyText').textContent = 'เบราว์เซอร์นี้ไม่อนุญาตให้ใช้ IndexedDB — ลองเปิดผ่าน http://localhost หรือ Chrome/Safari รุ่นใหม่';
+      empty.hidden = false;
+      showToast(cause.message);
+    }
+  })();
+})();
+</script>
+</body>
+</html>
