@@ -65,6 +65,12 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
   const [duplicate, setDuplicate] = useState<ExistingCoupon | null>(null);
   const [source, setSource] = useState<'upload' | 'paste'>('upload');
 
+  // ต้องอยู่ก่อน early return ทุกตัว ไม่งั้น hook count เปลี่ยนตอนเปลี่ยน phase → React error #310
+  const language = useMemo(
+    () => checkTextLanguage(form.description, { ocrConfidence: meta.confidence }),
+    [form.description, meta.confidence],
+  );
+
   useEffect(() => {
     if (phase !== 'idle') return;
     const onPaste = (event: ClipboardEvent) => {
@@ -407,10 +413,6 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
 
   const confidence = meta.confidence;
   const lowConfidence = confidence !== null && confidence < 65;
-  const language = useMemo(
-    () => checkTextLanguage(form.description, { ocrConfidence: meta.confidence }),
-    [form.description, meta.confidence],
-  );
 
   return (
     <form onSubmit={save}>
