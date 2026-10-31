@@ -1,3 +1,4 @@
+import { revalidateTag, unstable_cache } from 'next/cache';
 import * as demo from './demo';
 import * as gas from './gas';
 import type { Coupon, CouponImageInput, CouponInput, ListCouponsOptions, ListResult, UsageLog } from '../types';
@@ -8,73 +9,138 @@ export function storeMode(): StoreMode {
   return gas.isGasConfigured() ? 'gas' : 'demo';
 }
 
-export function listCoupons(options: ListCouponsOptions): Promise<ListResult> {
-  return storeMode() === 'gas' ? gas.listCoupons(options) : demo.listCoupons(options);
+const LIST_TAG = 'coupons';
+const couponTag = (couponId: string) => `coupon:${couponId}`;
+const CACHE_SECONDS = 30;
+
+function invalidate(couponId?: string): void {
+  revalidateTag(LIST_TAG, { expire: 0 });
+  if (couponId) revalidateTag(couponTag(couponId), { expire: 0 });
 }
+
+const cachedListCoupons = unstable_cache(
+  async (options: ListCouponsOptions): Promise<ListResult> =>
+    storeMode() === 'gas' ? gas.listCoupons(options) : demo.listCoupons(options),
+  ['listCoupons'],
+  { tags: [LIST_TAG], revalidate: CACHE_SECONDS },
+);
+
+export function listCoupons(options: ListCouponsOptions): Promise<ListResult> {
+  return cachedListCoupons(options);
+}
+
+const cachedListAllCoupons = unstable_cache(
+  async (options: Omit<ListCouponsOptions, 'userId'>): Promise<ListResult> =>
+    storeMode() === 'gas' ? gas.listAllCoupons(options) : demo.listAllCoupons(options),
+  ['listAllCoupons'],
+  { tags: [LIST_TAG], revalidate: CACHE_SECONDS },
+);
 
 export function listAllCoupons(
   options: Omit<ListCouponsOptions, 'userId'>,
 ): Promise<ListResult> {
-  return storeMode() === 'gas' ? gas.listAllCoupons(options) : demo.listAllCoupons(options);
+  return cachedListAllCoupons(options);
 }
 
-export function purgeCouponAny(couponId: string): Promise<void> {
-  return storeMode() === 'gas' ? gas.purgeCouponAny(couponId) : demo.purgeCouponAny(couponId);
+export async function purgeCouponAny(couponId: string): Promise<void> {
+  await (storeMode() === 'gas' ? gas.purgeCouponAny(couponId) : demo.purgeCouponAny(couponId));
+  invalidate(couponId);
 }
+
+const cachedGetSharedCoupon = unstable_cache(
+  async (couponId: string): Promise<Coupon> =>
+    storeMode() === 'gas' ? gas.getSharedCoupon(couponId) : demo.getSharedCoupon(couponId),
+  ['getSharedCoupon'],
+  { tags: [LIST_TAG], revalidate: CACHE_SECONDS },
+);
 
 export function getSharedCoupon(couponId: string): Promise<Coupon> {
-  return storeMode() === 'gas' ? gas.getSharedCoupon(couponId) : demo.getSharedCoupon(couponId);
+  return cachedGetSharedCoupon(couponId);
 }
+
+const cachedGetCoupon = unstable_cache(
+  async (couponId: string, userId: string): Promise<Coupon> =>
+    storeMode() === 'gas' ? gas.getCoupon(couponId, userId) : demo.getCoupon(couponId, userId),
+  ['getCoupon'],
+  { tags: [LIST_TAG], revalidate: CACHE_SECONDS },
+);
 
 export function getCoupon(couponId: string, userId: string): Promise<Coupon> {
-  return storeMode() === 'gas' ? gas.getCoupon(couponId, userId) : demo.getCoupon(couponId, userId);
+  return cachedGetCoupon(couponId, userId);
 }
 
-export function createCoupon(
+export async function createCoupon(
   userId: string,
   input: CouponInput,
   image?: CouponImageInput,
 ): Promise<Coupon> {
-  return storeMode() === 'gas'
+  const coupon = await (storeMode() === 'gas'
     ? gas.createCoupon(userId, input, image)
-    : demo.createCoupon(userId, input, image);
+    : demo.createCoupon(userId, input, image));
+  invalidate(coupon.couponId);
+  return coupon;
 }
 
-export function updateCoupon(
+export async function updateCoupon(
   couponId: string,
   userId: string,
   patch: Partial<CouponInput>,
 ): Promise<Coupon> {
-  return storeMode() === 'gas'
+  const coupon = await (storeMode() === 'gas'
     ? gas.updateCoupon(couponId, userId, patch)
-    : demo.updateCoupon(couponId, userId, patch);
+    : demo.updateCoupon(couponId, userId, patch));
+  invalidate(couponId);
+  return coupon;
 }
 
-export function markUsed(couponId: string, userId: string): Promise<Coupon> {
-  return storeMode() === 'gas' ? gas.markUsed(couponId, userId) : demo.markUsed(couponId, userId);
+export async function markUsed(couponId: string, userId: string): Promise<Coupon> {
+  const coupon = await (storeMode() === 'gas'
+    ? gas.markUsed(couponId, userId)
+    : demo.markUsed(couponId, userId));
+  invalidate(couponId);
+  return coupon;
 }
 
-export function undoUsed(couponId: string, userId: string): Promise<Coupon> {
-  return storeMode() === 'gas' ? gas.undoUsed(couponId, userId) : demo.undoUsed(couponId, userId);
+export async function undoUsed(couponId: string, userId: string): Promise<Coupon> {
+  const coupon = await (storeMode() === 'gas'
+    ? gas.undoUsed(couponId, userId)
+    : demo.undoUsed(couponId, userId));
+  invalidate(couponId);
+  return coupon;
 }
 
-export function deleteCoupon(couponId: string, userId: string): Promise<Coupon> {
-  return storeMode() === 'gas'
+export async function deleteCoupon(couponId: string, userId: string): Promise<Coupon> {
+  const coupon = await (storeMode() === 'gas'
     ? gas.deleteCoupon(couponId, userId)
-    : demo.deleteCoupon(couponId, userId);
+    : demo.deleteCoupon(couponId, userId));
+  invalidate(couponId);
+  return coupon;
 }
 
-export function purgeCoupon(couponId: string, userId: string): Promise<void> {
-  return storeMode() === 'gas'
+export async function purgeCoupon(couponId: string, userId: string): Promise<void> {
+  await (storeMode() === 'gas'
     ? gas.purgeCoupon(couponId, userId)
-    : demo.purgeCoupon(couponId, userId);
+    : demo.purgeCoupon(couponId, userId));
+  invalidate(couponId);
 }
+
+const cachedListHistory = unstable_cache(
+  async (couponId: string, userId: string): Promise<UsageLog[]> =>
+    storeMode() === 'gas' ? gas.listHistory(couponId, userId) : demo.listHistory(couponId, userId),
+  ['listHistory'],
+  { tags: [LIST_TAG], revalidate: CACHE_SECONDS },
+);
 
 export function listHistory(couponId: string, userId: string): Promise<UsageLog[]> {
-  return storeMode() === 'gas'
-    ? gas.listHistory(couponId, userId)
-    : demo.listHistory(couponId, userId);
+  return cachedListHistory(couponId, userId);
 }
+
+const cachedGetStats = unstable_cache(
+  async (userId: string) =>
+    storeMode() === 'gas' ? gas.getStats(userId) : demo.getStats(userId),
+  ['getStats'],
+  { tags: [LIST_TAG], revalidate: CACHE_SECONDS },
+);
 
 export function getStats(userId: string): Promise<{
   total: number;
@@ -83,7 +149,7 @@ export function getStats(userId: string): Promise<{
   expiring: number;
   expired: number;
 }> {
-  return storeMode() === 'gas' ? gas.getStats(userId) : demo.getStats(userId);
+  return cachedGetStats(userId);
 }
 
 export function isDemoMode(): boolean {
