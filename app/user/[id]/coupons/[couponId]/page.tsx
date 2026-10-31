@@ -52,29 +52,6 @@ export default async function CouponDetailPage({ params, searchParams }: PagePro
 
   const infoTab = (
     <>
-      {coupon.couponCode ? (
-        <div className="code-box">
-          <div>
-            <p className="meta-label">รหัสคูปอง</p>
-            <p className="code-value">{coupon.couponCode}</p>
-          </div>
-          <CopyButton value={coupon.couponCode} label="คัดลอก" />
-        </div>
-      ) : null}
-
-      {!coupon.qrRawValue ? (
-        <p className="notice notice-info">
-          <QrIcon size={16} />
-          คูปองนี้ไม่มี QR Code — ใช้รหัสคูปองด้านบนที่ช่องทางของร้าน
-        </p>
-      ) : null}
-
-      <CouponActions
-        coupon={coupon}
-        actorId={actorId}
-        qrHref={coupon.qrRawValue ? `/user/${actorId}/coupons/${coupon.couponId}/qr` : undefined}
-      />
-
       <div className="meta-grid">
         <div className="meta-item">
           <span className="meta-label">สถานะ</span>
@@ -231,11 +208,36 @@ export default async function CouponDetailPage({ params, searchParams }: PagePro
         </div>
       </div>
 
+      <div className="detail-actions-block">
+        {coupon.couponCode ? (
+          <div className="code-box">
+            <div>
+              <p className="meta-label">รหัสคูปอง</p>
+              <p className="code-value">{coupon.couponCode}</p>
+            </div>
+            <CopyButton value={coupon.couponCode} label="คัดลอก" />
+          </div>
+        ) : null}
+
+        {!coupon.qrRawValue ? (
+          <p className="notice notice-info">
+            <QrIcon size={16} />
+            คูปองนี้ไม่มี QR Code — ใช้รหัสคูปองด้านบนที่ช่องทางของร้าน
+          </p>
+        ) : null}
+
+        <CouponActions
+          coupon={coupon}
+          actorId={actorId}
+          qrHref={coupon.qrRawValue ? `/user/${actorId}/coupons/${coupon.couponId}/qr` : undefined}
+        />
+      </div>
+
       <DetailTabs
         initialTab={query.tab}
         tabs={[
-          { key: 'info', label: 'ข้อมูล', content: infoTab },
           { key: 'image', label: 'รูปคูปอง', content: imageTab },
+          { key: 'info', label: 'ข้อมูล', content: infoTab },
           { key: 'history', label: 'ประวัติ', content: historyTab },
         ]}
       />

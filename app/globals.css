@@ -2787,3 +2787,10 @@ button.back-link {
 .coupon-image-thumb.is-full img {
   max-height: none;
 }
+
+.detail-actions-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
