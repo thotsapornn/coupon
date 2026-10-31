@@ -12,10 +12,13 @@ export function CouponImage({
   src,
   alt,
   originalHref,
+  size = 'compact',
 }: {
   src: string;
   alt: string;
   originalHref?: string;
+  /** compact = รูปย่อ, full = แสดงเต็มความกว้างโดยไม่จำกัดความสูง */
+  size?: 'compact' | 'full';
 }) {
   const [open, setOpen] = useState(false);
 
@@ -23,7 +26,7 @@ export function CouponImage({
     <>
       <button
         type="button"
-        className="coupon-image-thumb"
+        className={`coupon-image-thumb${size === 'full' ? ' is-full' : ''}`}
         onClick={() => setOpen(true)}
         aria-label="ดูรูปเต็ม"
       >

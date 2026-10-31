@@ -2773,8 +2773,17 @@ button.back-link {
   margin-bottom: 14px;
 }
 
+.detail-tabs .tab {
+  flex: 1 1 0;
+  justify-content: center;
+}
+
 .detail-tab-content {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.coupon-image-thumb.is-full img {
+  max-height: none;
 }

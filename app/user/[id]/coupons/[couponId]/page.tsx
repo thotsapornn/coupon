@@ -174,6 +174,7 @@ export default async function CouponDetailPage({ params, searchParams }: PagePro
         src={toDisplayImageUrl(coupon.imageUrl) ?? coupon.imageUrl}
         alt={`Screenshot คูปอง ${coupon.title}`}
         originalHref={coupon.imageUrl}
+        size="full"
       />
     </div>
   ) : (
