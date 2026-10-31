@@ -11,10 +11,11 @@ import { CopyIcon, ShareIcon, SparklesIcon, TicketIcon } from './Icons';
 
 type TabKey = 'code' | 'barcode' | 'qr';
 
+// เรียงตามความสำคัญ: QR คือผลลัพธ์หลัก รองลงมาบาร์โค้ด แล้วข้อความ
 const TABS: Array<{ key: TabKey; label: string }> = [
-  { key: 'code', label: 'ข้อความ' },
-  { key: 'barcode', label: 'บาร์โค้ด' },
   { key: 'qr', label: 'QR' },
+  { key: 'barcode', label: 'บาร์โค้ด' },
+  { key: 'code', label: 'ข้อความ' },
 ];
 
 export function TextCodeTool({ initialText }: { initialText: string }) {
