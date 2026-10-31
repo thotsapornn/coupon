@@ -7,17 +7,17 @@ import { CouponCard } from './CouponCard';
 import { EmptyState } from './EmptyState';
 import { GridIcon, ListIcon, SearchIcon } from './Icons';
 
-// เรียงตามความสำคัญ: ที่ต้องใช้ก่อน → ใกล้หมดอายุ → หมดอายุ → ใช้แล้ว
+// เรียงตามความสำคัญ: ที่ต้องใช้ก่อน → ใกล้หมดอายุ → หมดอายุ → ใช้แล้ว → ทั้งหมด
 const TABS: Array<{ key: ListStatusFilter; label: string }> = [
-  { key: 'all', label: 'ทั้งหมด' },
   { key: 'unused', label: 'ยังไม่ใช้' },
   { key: 'expiring', label: 'ใกล้หมดอายุ' },
   { key: 'expired', label: 'หมดอายุ' },
   { key: 'used', label: 'ใช้แล้ว' },
+  { key: 'all', label: 'ทั้งหมด' },
 ];
 
 export function CouponList({ coupons, addHref }: { coupons: Coupon[]; addHref?: string }) {
-  const [status, setStatus] = useState<ListStatusFilter>('all');
+  const [status, setStatus] = useState<ListStatusFilter>('unused');
   const [query, setQuery] = useState('');
   const [view, setView] = useState<'grid' | 'list'>('list');
 
