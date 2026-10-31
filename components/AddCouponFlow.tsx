@@ -23,7 +23,7 @@ import {
   UploadIcon,
 } from './Icons';
 
-type Phase = 'idle' | 'processing' | 'review';
+type Phase = 'idle' | 'crop' | 'processing' | 'review';
 
 interface ExistingCoupon {
   couponId: string;
@@ -46,10 +46,23 @@ interface Meta {
   size?: { width: number; height: number };
 }
 
+interface PendingCrop {
+  image: PreparedImage;
+  run: number;
+  startedAt: number;
+  decodeMs: number;
+}
+
 function FlowSteps({ phase }: { phase: Phase }) {
   return (
     <div className="flow-steps" aria-hidden="true">
-      <span className={`flow-step ${phase === 'idle' ? 'is-active' : 'is-done'}`}>1. รูปคูปอง</span>
+      <span
+        className={`flow-step ${
+          phase === 'idle' || phase === 'crop' ? 'is-active' : 'is-done'
+        }`}
+      >
+        1. รูปคูปอง
+      </span>
       <span
         className={`flow-step ${phase === 'processing' ? 'is-active' : phase === 'review' ? 'is-done' : ''}`}
       >
@@ -80,6 +93,7 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
   const [duplicate, setDuplicate] = useState<ExistingCoupon | null>(null);
   const [source, setSource] = useState<'upload' | 'paste'>('upload');
   const [cropping, setCropping] = useState(false);
+  const [pending, setPending] = useState<PendingCrop | null>(null);
 
   // ต้องอยู่ก่อน early return ทุกตัว ไม่งั้น hook count เปลี่ยนตอนเปลี่ยน phase → React error #310
   const language = useMemo(
@@ -121,6 +135,7 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
     setError(null);
     setDuplicate(null);
     setCropping(false);
+    setPending(null);
     if (inputRef.current) inputRef.current.value = '';
     if (cameraRef.current) cameraRef.current.value = '';
   }, []);
@@ -142,10 +157,28 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
     try {
       const prepared = await prepareImage(file);
       if (run !== runRef.current) return;
-
       const decodeMs = Math.round(performance.now() - startedAt);
-      setImage(prepared);
       setTimings({ decode: decodeMs });
+      setPending({ image: prepared, run, startedAt, decodeMs });
+      setPhase('crop');
+      setProgress(null);
+    } catch (cause) {
+      if (run !== runRef.current) return;
+      setError((cause as Error).message);
+      setPhase('idle');
+      setProgress(null);
+    }
+  }
+
+  /** อ่าน QR + OCR จากรูป (หลังผ่านหน้าครอปแล้ว) */
+  async function analyze(prepared: PreparedImage, run: number, startedAt: number, decodeMs: number) {
+    setPending(null);
+    setPhase('processing');
+    setError(null);
+    setProgress({ stage: 'recognizing', progress: 8, label: 'กำลังอ่าน QR Code…' });
+
+    try {
+      setImage(prepared);
       setMeta({
         warnings: [],
         qr: null,
@@ -153,7 +186,6 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
         confidence: null,
         size: { width: prepared.width, height: prepared.height },
       });
-      setProgress({ stage: 'recognizing', progress: 8, label: 'กำลังอ่าน QR Code…' });
 
       const qrResult = await scanQr(prepared.canvas);
       if (run !== runRef.current) return;
@@ -382,6 +414,31 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
             ยกเลิก
           </Link>
         </div>
+      </div>
+    );
+  }
+
+  if (phase === 'crop' && pending) {
+    return (
+      <div className="uploader">
+        <FlowSteps phase="crop" />
+        <div className="panel">
+          <div className="review-preview">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={pending.image.dataUrl} alt="รูปที่เลือก" />
+          </div>
+          <p className="notice notice-info" style={{ marginTop: 12 }}>
+            <InfoIcon size={16} />
+            <span>จัดกรอบรูปในหน้าต่างที่เปิดขึ้น — กด “ใช้รูปเต็ม” เพื่ออ่านทั้งรูป</span>
+          </p>
+        </div>
+
+        <ImageCropper
+          image={pending.image}
+          cancelLabel="ใช้รูปเต็ม"
+          onCancel={() => void analyze(pending.image, pending.run, pending.startedAt, pending.decodeMs)}
+          onApply={(next) => void analyze(next, pending.run, pending.startedAt, pending.decodeMs)}
+        />
       </div>
     );
   }

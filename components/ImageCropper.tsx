@@ -33,10 +33,12 @@ export function ImageCropper({
   image,
   onApply,
   onCancel,
+  cancelLabel = 'ยกเลิก',
 }: {
   image: PreparedImage;
   onApply: (next: PreparedImage) => void;
   onCancel: () => void;
+  cancelLabel?: string;
 }) {
   const [rect, setRect] = useState<Rect>(DEFAULT_RECT);
   const [stage, setStage] = useState(() => fitStage(image));
@@ -180,7 +182,7 @@ export function ImageCropper({
 
         <div className="crop-actions">
           <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={busy}>
-            ยกเลิก
+            {cancelLabel}
           </button>
           <button
             type="button"
