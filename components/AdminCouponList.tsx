@@ -13,9 +13,9 @@ import { AlertIcon, InfoIcon, SearchIcon, ShieldIcon, TicketIcon, TrashIcon } fr
 const FILTERS: Array<{ key: ListStatusFilter; label: string }> = [
   { key: 'all', label: 'ทั้งหมด' },
   { key: 'unused', label: 'ยังไม่ใช้' },
-  { key: 'used', label: 'ใช้แล้ว' },
-  { key: 'expired', label: 'หมดอายุ' },
   { key: 'expiring', label: 'ใกล้หมดอายุ' },
+  { key: 'expired', label: 'หมดอายุ' },
+  { key: 'used', label: 'ใช้แล้ว' },
 ];
 
 const STATUS_LABEL: Record<string, string> = {
