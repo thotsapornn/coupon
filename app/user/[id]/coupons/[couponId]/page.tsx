@@ -235,8 +235,8 @@ export default async function CouponDetailPage({ params, searchParams }: PagePro
         initialTab={query.tab}
         tabs={[
           { key: 'info', label: 'ข้อมูล', content: infoTab },
-          { key: 'history', label: 'ประวัติ', content: historyTab },
           { key: 'image', label: 'รูปคูปอง', content: imageTab },
+          { key: 'history', label: 'ประวัติ', content: historyTab },
         ]}
       />
     </div>
