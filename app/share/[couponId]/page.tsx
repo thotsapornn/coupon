@@ -57,7 +57,9 @@ export default async function SharedCouponPage({ params }: PageProps) {
           <div className="detail-sub">
             <span className={`coupon-expiry tone-${expiry.tone}`}>
               <ClockIcon size={14} />
-              {expiry.text}
+              {coupon.expiryDate && !expiry.text.includes(formatThaiDate(coupon.expiryDate))
+                ? `${expiry.text} · ${formatThaiDate(coupon.expiryDate)}`
+                : expiry.text}
             </span>
             {coupon.status === 'used' && coupon.usedAt ? (
               <span>· ใช้เมื่อ {formatDateTime(coupon.usedAt)}</span>
