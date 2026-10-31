@@ -2806,3 +2806,22 @@ button.back-link {
 .detail-title-row .detail-title {
   min-width: 0;
 }
+
+.detail-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.detail-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+
+.detail-top-actions .btn-icon {
+  width: 36px;
+  height: 36px;
+}

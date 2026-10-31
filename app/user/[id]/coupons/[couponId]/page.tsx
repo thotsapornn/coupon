@@ -188,21 +188,31 @@ export default async function CouponDetailPage({ params, searchParams }: PagePro
 
       <div className="detail-panel">
         <div className="detail-top">
-          <div className="detail-sub">
-            <span className="coupon-merchant">{coupon.merchant ?? 'คูปอง'}</span>
-            <StatusBadge coupon={coupon} />
-            {coupon.duplicateOf ? <span className="badge badge-expiring">อาจซ้ำ</span> : null}
+          <div className="detail-top-bar">
+            <div className="detail-sub">
+              <span className="coupon-merchant">{coupon.merchant ?? 'คูปอง'}</span>
+              <StatusBadge coupon={coupon} />
+              {coupon.duplicateOf ? <span className="badge badge-expiring">อาจซ้ำ</span> : null}
+            </div>
+            <div className="detail-top-actions">
+              <ShareCouponButton
+                couponId={coupon.couponId}
+                title={coupon.title}
+                label="คัดลอกลิงก์"
+                copyOnly
+                iconOnly
+                className="btn btn-secondary btn-icon"
+              />
+              <ShareCouponButton
+                couponId={coupon.couponId}
+                title={coupon.title}
+                label="แชร์"
+                iconOnly
+                className="btn btn-primary btn-icon"
+              />
+            </div>
           </div>
-          <div className="detail-title-row">
-            <h1 className="detail-title">{coupon.title}</h1>
-            <ShareCouponButton
-              couponId={coupon.couponId}
-              title={coupon.title}
-              label="แชร์"
-              iconOnly
-              className="btn btn-secondary btn-icon"
-            />
-          </div>
+          <h1 className="detail-title">{coupon.title}</h1>
           {coupon.discountText ? <p className="coupon-discount">{coupon.discountText}</p> : null}
           <div className="detail-sub">
             <span className={`coupon-expiry tone-${expiry.tone}`}>

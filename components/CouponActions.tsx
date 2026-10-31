@@ -126,13 +126,6 @@ export function CouponActions({
         </div>
 
         <div className="detail-action-row">
-          <ShareCouponButton
-            couponId={coupon.couponId}
-            title={coupon.title}
-            label="คัดลอกลิงก์"
-            copyOnly
-            className="btn btn-secondary"
-          />
           <Link href={`/user/${actorId}/coupons/${coupon.couponId}/edit`} className="btn btn-secondary">
             <PencilIcon size={16} />
             แก้ไข
