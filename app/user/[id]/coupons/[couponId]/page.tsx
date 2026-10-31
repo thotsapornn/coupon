@@ -125,19 +125,18 @@ export default async function CouponDetailPage({ params, searchParams }: PagePro
             </div>
           ) : null}
 
-          {coupon.qrRawValue ? (
-            <Link href={`/user/${actorId}/coupons/${coupon.couponId}/qr`} className="btn btn-primary btn-block">
-              <QrIcon size={17} />
-              เปิด QR Code สำหรับใช้ที่ร้าน
-            </Link>
-          ) : (
+          {!coupon.qrRawValue ? (
             <p className="notice notice-info">
               <QrIcon size={16} />
               คูปองนี้ไม่มี QR Code — ใช้รหัสคูปองด้านบนที่ช่องทางของร้าน
             </p>
-          )}
+          ) : null}
 
-          <CouponActions coupon={coupon} actorId={actorId} />
+          <CouponActions
+            coupon={coupon}
+            actorId={actorId}
+            qrHref={coupon.qrRawValue ? `/user/${actorId}/coupons/${coupon.couponId}/qr` : undefined}
+          />
 
           <div className="meta-grid">
             <div className="meta-item">

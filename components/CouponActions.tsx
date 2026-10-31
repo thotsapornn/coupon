@@ -6,12 +6,20 @@ import type { Coupon } from '@/lib/types';
 import { getDisplayStatus } from '@/lib/format';
 import { ConfirmDialog } from './ConfirmDialog';
 import { ShareCouponButton } from './ShareCouponButton';
-import { CheckIcon, PencilIcon, TrashIcon, UndoIcon } from './Icons';
+import { CheckIcon, PencilIcon, QrIcon, TrashIcon, UndoIcon } from './Icons';
 import Link from 'next/link';
 
 type Action = 'use' | 'undo' | 'delete';
 
-export function CouponActions({ coupon, actorId }: { coupon: Coupon; actorId: string }) {
+export function CouponActions({
+  coupon,
+  actorId,
+  qrHref,
+}: {
+  coupon: Coupon;
+  actorId: string;
+  qrHref?: string;
+}) {
   const router = useRouter();
   const [action, setAction] = useState<Action | null>(null);
   const [busy, setBusy] = useState(false);
@@ -87,18 +95,34 @@ export function CouponActions({ coupon, actorId }: { coupon: Coupon; actorId: st
       ) : null}
 
       <div className="detail-actions">
-        <div className="detail-action-row">
+        <div className="detail-primary-row">
           {coupon.status === 'unused' ? (
             <button type="button" className="btn btn-success" onClick={() => setAction('use')}>
               <CheckIcon size={16} />
               ใช้คูปองแล้ว
             </button>
           ) : (
-            <button type="button" className="btn btn-soft-green" onClick={() => setAction('undo')}>
+            <button
+              type="button"
+              className="btn btn-soft-green"
+              onClick={() => setAction('undo')}
+              aria-label="ย้อนกลับเป็นยังไม่ใช้"
+            >
               <UndoIcon size={16} />
-              ย้อนกลับเป็นยังไม่ใช้
+              ย้อนกลับ
             </button>
           )}
+
+          {qrHref ? (
+            <Link
+              href={qrHref}
+              className="btn btn-primary"
+              aria-label="เปิด QR Code สำหรับใช้ที่ร้าน"
+            >
+              <QrIcon size={16} />
+              เปิด QR
+            </Link>
+          ) : null}
         </div>
 
         <div className="detail-action-row">
