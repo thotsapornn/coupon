@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeftIcon } from '@/components/Icons';
 import { BaselineClient } from '@/components/BaselineClient';
+import { BackLink } from '@/components/BackLink';
 
 export const metadata = {
   title: 'Baseline OCR & QR',
@@ -9,10 +10,9 @@ export const metadata = {
 export default function BaselinePage() {
   return (
     <div className="page">
-      <Link href="/" className="back-link">
-        <ArrowLeftIcon size={15} />
+      <BackLink fallback="/">
         กลับไปหน้ารายการ
-      </Link>
+      </BackLink>
 
       <div className="page-head">
         <h1 className="page-title">Baseline OCR & QR</h1>

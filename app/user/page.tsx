@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeftIcon } from '@/components/Icons';
 import { UserEntry } from '@/components/UserEntry';
+import { BackLink } from '@/components/BackLink';
 
 export const metadata = {
   title: 'เข้ากระเป๋าคูปอง',
@@ -9,10 +10,9 @@ export const metadata = {
 export default function UserEntryPage() {
   return (
     <div className="page page-narrow">
-      <Link href="/qr" className="back-link">
-        <ArrowLeftIcon size={15} />
+      <BackLink fallback="/qr">
         กลับไปสร้าง QR
-      </Link>
+      </BackLink>
 
       <div className="page-head">
         <h1 className="page-title">กระเป๋าคูปอง</h1>

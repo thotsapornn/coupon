@@ -4,11 +4,12 @@ import { CopyButton } from '@/components/CopyButton';
 import { FullscreenButton } from '@/components/FullscreenButton';
 import { QrTabs } from '@/components/QrTabs';
 import { ShareCouponButton } from '@/components/ShareCouponButton';
-import { ArrowLeftIcon, CheckCircleIcon, QrIcon } from '@/components/Icons';
+import { CheckCircleIcon, QrIcon } from '@/components/Icons';
 import { getCoupon } from '@/lib/store';
 import { ApiError } from '@/lib/errors';
 import { formatThaiDate, getExpiryLabel } from '@/lib/format';
 import { normalizeUserId } from '@/lib/user';
+import { BackLink } from '@/components/BackLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,10 +33,9 @@ export default async function CouponQrPage({ params }: PageProps) {
 
   return (
     <div className="page">
-      <Link href={`/user/${actorId}/coupons/${coupon.couponId}`} className="back-link">
-        <ArrowLeftIcon size={15} />
+      <BackLink fallback={`/user/${actorId}/coupons/${coupon.couponId}`}>
         กลับไปรายละเอียดคูปอง
-      </Link>
+      </BackLink>
 
       <div className="qr-shell">
         <div className="qr-card" id="qr-card">

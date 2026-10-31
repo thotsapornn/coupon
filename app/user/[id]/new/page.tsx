@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { AddCouponFlow } from '@/components/AddCouponFlow';
-import { ArrowLeftIcon } from '@/components/Icons';
 import { notFound as nextNotFound } from 'next/navigation';
 import { listCoupons } from '@/lib/store';
 import { normalizeUserId } from '@/lib/user';
+import { BackLink } from '@/components/BackLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,10 +28,9 @@ export default async function NewCouponPage({ params }: PageProps) {
 
   return (
     <div className="page">
-      <Link href={`/user/${actorId}`} className="back-link">
-        <ArrowLeftIcon size={15} />
+      <BackLink fallback={`/user/${actorId}`}>
         กลับไปหน้ารายการ
-      </Link>
+      </BackLink>
 
       <div className="page-head">
         <h1 className="page-title">เพิ่มคูปอง</h1>

@@ -2707,3 +2707,10 @@ ul, ol {
   font-size: 11.5px;
   color: var(--ink-soft);
 }
+
+button.back-link {
+  border: 0;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+}

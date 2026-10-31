@@ -4,7 +4,6 @@ import { CouponActions } from '@/components/CouponActions';
 import { HistoryTimeline } from '@/components/HistoryTimeline';
 import { StatusBadge } from '@/components/StatusBadge';
 import {
-  ArrowLeftIcon,
   CheckCircleIcon,
   ClockIcon,
   HistoryIcon,
@@ -18,6 +17,7 @@ import { ApiError } from '@/lib/errors';
 import { formatDateTime, formatThaiDate, getDisplayStatus, getExpiryLabel } from '@/lib/format';
 import { toDisplayImageUrl } from '@/lib/image-url';
 import { normalizeUserId } from '@/lib/user';
+import { BackLink } from '@/components/BackLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,10 +52,9 @@ export default async function CouponDetailPage({ params, searchParams }: PagePro
 
   return (
     <div className="page">
-      <Link href={`/user/${actorId}`} className="back-link">
-        <ArrowLeftIcon size={15} />
+      <BackLink fallback={`/user/${actorId}`}>
         กลับไปหน้ารายการ
-      </Link>
+      </BackLink>
 
       {query.created === '1' ? (
         <p className="notice notice-success" role="status" style={{ marginBottom: 16 }}>

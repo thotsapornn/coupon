@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import { notFound as nextNotFound } from 'next/navigation';
 import { HistoryTimeline } from '@/components/HistoryTimeline';
-import { ArrowLeftIcon, HistoryIcon } from '@/components/Icons';
+import { HistoryIcon } from '@/components/Icons';
 import { getCoupon, listHistory } from '@/lib/store';
 import { ApiError } from '@/lib/errors';
 import { formatDateTime } from '@/lib/format';
 import { normalizeUserId } from '@/lib/user';
+import { BackLink } from '@/components/BackLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,10 +28,9 @@ export default async function CouponHistoryPage({ params }: PageProps) {
 
   return (
     <div className="page page-narrow">
-      <Link href={`/user/${actorId}/coupons/${coupon.couponId}`} className="back-link">
-        <ArrowLeftIcon size={15} />
+      <BackLink fallback={`/user/${actorId}/coupons/${coupon.couponId}`}>
         กลับไปรายละเอียดคูปอง
-      </Link>
+      </BackLink>
 
       <div className="page-head">
         <h1 className="page-title">

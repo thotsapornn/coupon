@@ -10,6 +10,7 @@ import { getSharedCoupon } from '@/lib/store';
 import { ApiError } from '@/lib/errors';
 import { formatDateTime, formatThaiDate, getExpiryLabel } from '@/lib/format';
 import { toDisplayImageUrl } from '@/lib/image-url';
+import { BackLink } from '@/components/BackLink';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,10 +42,9 @@ export default async function SharedCouponPage({ params }: PageProps) {
 
   return (
     <div className="page page-narrow">
-      <Link href="/" className="back-link">
-        <ArrowLeftIcon size={15} />
+      <BackLink fallback="/">
         กลับหน้าแรก
-      </Link>
+      </BackLink>
 
       <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div className="detail-top">
