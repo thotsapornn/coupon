@@ -8,7 +8,6 @@ import {
   ClockIcon,
   HistoryIcon,
   QrIcon,
-  TicketIcon,
 } from '@/components/Icons';
 import { CopyButton } from '@/components/CopyButton';
 import { CouponImage } from '@/components/CouponImage';
@@ -80,23 +79,6 @@ export default async function CouponDetailPage({ params, searchParams }: PagePro
       ) : null}
 
       <div className="detail-grid">
-        <div>
-          <div className="detail-media">
-            {coupon.imageUrl ? (
-              <CouponImage
-                src={toDisplayImageUrl(coupon.imageUrl) ?? coupon.imageUrl}
-                alt={`Screenshot คูปอง ${coupon.title}`}
-                originalHref={coupon.imageUrl}
-              />
-            ) : (
-              <div className="detail-placeholder">
-                <TicketIcon size={34} />
-                <p className="small">ไม่มีรูปต้นฉบับสำหรับคูปองนี้</p>
-              </div>
-            )}
-          </div>
-        </div>
-
         <div className="detail-panel">
           <div className="detail-top">
             <div className="detail-sub">
@@ -228,6 +210,16 @@ export default async function CouponDetailPage({ params, searchParams }: PagePro
         </div>
         <HistoryTimeline logs={logs} limit={4} />
       </div>
+
+      {coupon.imageUrl ? (
+        <div className="detail-media" style={{ marginTop: 22 }}>
+          <CouponImage
+            src={toDisplayImageUrl(coupon.imageUrl) ?? coupon.imageUrl}
+            alt={`Screenshot คูปอง ${coupon.title}`}
+            originalHref={coupon.imageUrl}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }
