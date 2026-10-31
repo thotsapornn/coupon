@@ -1574,8 +1574,21 @@ ul, ol {
 
 .detail-actions {
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.detail-action-row {
+  display: flex;
   flex-wrap: wrap;
-  gap: 9px;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-action-row.is-danger {
+  margin-top: 2px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
 }
 
 .timeline {

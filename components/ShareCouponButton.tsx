@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { copyText } from '@/lib/clipboard';
 import { shareBaseUrl } from '@/lib/site-url';
-import { CheckIcon, ShareIcon } from './Icons';
+import { CheckIcon, CopyIcon, ShareIcon } from './Icons';
 
 export function ShareCouponButton({
   couponId,
@@ -51,7 +51,13 @@ export function ShareCouponButton({
       aria-label={`${label} ${title}`}
       aria-live="polite"
     >
-      {status ? <CheckIcon size={15} /> : <ShareIcon size={15} />}
+      {status ? (
+        <CheckIcon size={15} />
+      ) : copyOnly ? (
+        <CopyIcon size={15} />
+      ) : (
+        <ShareIcon size={15} />
+      )}
       {status ?? label}
     </button>
   );

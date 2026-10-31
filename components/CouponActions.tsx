@@ -87,36 +87,41 @@ export function CouponActions({ coupon, actorId }: { coupon: Coupon; actorId: st
       ) : null}
 
       <div className="detail-actions">
-        {coupon.status === 'unused' ? (
-          <button type="button" className="btn btn-primary" onClick={() => setAction('use')}>
-            <CheckIcon size={16} />
-            ใช้คูปองแล้ว
+        <div className="detail-action-row">
+          {coupon.status === 'unused' ? (
+            <button type="button" className="btn btn-primary" onClick={() => setAction('use')}>
+              <CheckIcon size={16} />
+              ใช้คูปองแล้ว
+            </button>
+          ) : (
+            <button type="button" className="btn btn-soft-green" onClick={() => setAction('undo')}>
+              <UndoIcon size={16} />
+              ย้อนกลับเป็นยังไม่ใช้
+            </button>
+          )}
+        </div>
+
+        <div className="detail-action-row">
+          <ShareCouponButton couponId={coupon.couponId} title={coupon.title} className="btn btn-secondary" />
+          <ShareCouponButton
+            couponId={coupon.couponId}
+            title={coupon.title}
+            label="คัดลอกลิงก์"
+            copyOnly
+            className="btn btn-secondary"
+          />
+          <Link href={`/user/${actorId}/coupons/${coupon.couponId}/edit`} className="btn btn-secondary">
+            <PencilIcon size={16} />
+            แก้ไข
+          </Link>
+        </div>
+
+        <div className="detail-action-row is-danger">
+          <button type="button" className="btn btn-danger" onClick={() => setAction('delete')}>
+            <TrashIcon size={16} />
+            ลบคูปองนี้
           </button>
-        ) : (
-          <button type="button" className="btn btn-soft-green" onClick={() => setAction('undo')}>
-            <UndoIcon size={16} />
-            ย้อนกลับเป็นยังไม่ใช้
-          </button>
-        )}
-
-        <ShareCouponButton couponId={coupon.couponId} title={coupon.title} className="btn btn-secondary" />
-        <ShareCouponButton
-          couponId={coupon.couponId}
-          title={coupon.title}
-          label="คัดลอกลิงก์"
-          copyOnly
-          className="btn btn-ghost"
-        />
-
-        <Link href={`/user/${actorId}/coupons/${coupon.couponId}/edit`} className="btn btn-secondary">
-          <PencilIcon size={16} />
-          แก้ไข
-        </Link>
-
-        <button type="button" className="btn btn-danger" onClick={() => setAction('delete')}>
-          <TrashIcon size={16} />
-          ลบ
-        </button>
+        </div>
       </div>
 
       <ConfirmDialog
