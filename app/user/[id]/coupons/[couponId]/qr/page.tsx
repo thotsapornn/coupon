@@ -65,6 +65,13 @@ export default async function CouponQrPage({ params }: PageProps) {
 
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
           <ShareCouponButton couponId={coupon.couponId} title={coupon.title} className="btn btn-secondary btn-sm" />
+          <ShareCouponButton
+            couponId={coupon.couponId}
+            title={coupon.title}
+            label="คัดลอกลิงก์"
+            copyOnly
+            className="btn btn-ghost btn-sm"
+          />
           <FullscreenButton targetId="qr-card" />
           <Link href={`/user/${actorId}/coupons/${coupon.couponId}`} className="btn btn-ghost btn-sm">
             <QrIcon size={14} />

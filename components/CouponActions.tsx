@@ -100,6 +100,13 @@ export function CouponActions({ coupon, actorId }: { coupon: Coupon; actorId: st
         )}
 
         <ShareCouponButton couponId={coupon.couponId} title={coupon.title} className="btn btn-secondary" />
+        <ShareCouponButton
+          couponId={coupon.couponId}
+          title={coupon.title}
+          label="คัดลอกลิงก์"
+          copyOnly
+          className="btn btn-ghost"
+        />
 
         <Link href={`/user/${actorId}/coupons/${coupon.couponId}/edit`} className="btn btn-secondary">
           <PencilIcon size={16} />
