@@ -52,6 +52,15 @@ export function ImageCropper({
     return () => window.removeEventListener('resize', update);
   }, [image]);
 
+  // ล็อกไม่ให้หน้าหลัง modal เลื่อนขณะครอป (มือถือชอบเด้ง)
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
+
   function begin(event: React.PointerEvent, mode: Mode) {
     event.preventDefault();
     event.stopPropagation();

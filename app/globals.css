@@ -2447,6 +2447,8 @@ ul, ol {
   width: min(100%, 560px);
   max-height: 92vh;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   background: var(--surface);
   border-radius: 22px;
   padding: 16px;

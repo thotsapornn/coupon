@@ -73,6 +73,11 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
     [form.description, meta.confidence],
   );
 
+  // เปลี่ยนช่วง (idle → processing → review) ให้เริ่มที่ด้านบนเสมอ กันหน้าเด้งค้างตำแหน่งเดิม
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [phase]);
+
   useEffect(() => {
     if (phase !== 'idle') return;
     const onPaste = (event: ClipboardEvent) => {
