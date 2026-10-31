@@ -47,6 +47,8 @@ export interface CouponFieldsProps {
 export function CouponFields({ values, errors, disabled, onChange }: CouponFieldsProps) {
   return (
     <div className="form-grid">
+      <div className="form-section">
+        <div className="form-section-title">ข้อมูลหลัก</div>
       <div className="field">
         <label htmlFor="coupon-title">
           ชื่อคูปอง <span className="optional">จำเป็น</span>
@@ -106,8 +108,11 @@ export function CouponFields({ values, errors, disabled, onChange }: CouponField
           {errors.discountText ? <p className="field-error">{errors.discountText}</p> : null}
         </div>
       </div>
+      </div>
 
-      <div className="field-row">
+      <div className="form-section">
+        <div className="form-section-title">รหัสและวันหมดอายุ</div>
+        <div className="field-row">
         <div className="field">
           <label htmlFor="coupon-expiry">
             วันหมดอายุ <span className="optional">ไม่บังคับ</span>
@@ -145,8 +150,11 @@ export function CouponFields({ values, errors, disabled, onChange }: CouponField
           {errors.couponCode ? <p className="field-error">{errors.couponCode}</p> : null}
         </div>
       </div>
+      </div>
 
-      <div className="field">
+      <div className="form-section">
+        <div className="form-section-title">รายละเอียดเพิ่มเติม</div>
+        <div className="field">
         <label htmlFor="coupon-description">
           รายละเอียด <span className="optional">ไม่บังคับ</span>
         </label>
@@ -201,6 +209,7 @@ export function CouponFields({ values, errors, disabled, onChange }: CouponField
           </p>
         </div>
       </details>
+      </div>
     </div>
   );
 }

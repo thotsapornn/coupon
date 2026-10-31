@@ -46,6 +46,20 @@ interface Meta {
   size?: { width: number; height: number };
 }
 
+function FlowSteps({ phase }: { phase: Phase }) {
+  return (
+    <div className="flow-steps" aria-hidden="true">
+      <span className={`flow-step ${phase === 'idle' ? 'is-active' : 'is-done'}`}>1. รูปคูปอง</span>
+      <span
+        className={`flow-step ${phase === 'processing' ? 'is-active' : phase === 'review' ? 'is-done' : ''}`}
+      >
+        2. อ่านข้อมูล
+      </span>
+      <span className={`flow-step ${phase === 'review' ? 'is-active' : ''}`}>3. ตรวจสอบ</span>
+    </div>
+  );
+}
+
 export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]; userId: string }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -284,6 +298,7 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
   if (phase === 'idle') {
     return (
       <div className="uploader">
+        <FlowSteps phase="idle" />
         {error ? (
           <p className="notice notice-error" role="alert">
             <AlertIcon size={16} />
@@ -346,18 +361,26 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
           }}
         />
 
-        <div className="form-actions">
-          <Link href="/" className="btn btn-ghost">
-            ยกเลิก
-          </Link>
-          <button type="button" className="btn btn-secondary" onClick={() => inputRef.current?.click()}>
+        <div className="uploader-actions">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => inputRef.current?.click()}
+          >
             <UploadIcon size={16} />
             อัปโหลดรูป
           </button>
-          <button type="button" className="btn btn-primary" onClick={() => cameraRef.current?.click()}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => cameraRef.current?.click()}
+          >
             <CameraIcon size={16} />
             ถ่ายรูป
           </button>
+          <Link href={`/user/${userId}`} className="btn btn-ghost">
+            ยกเลิก
+          </Link>
         </div>
       </div>
     );
@@ -370,6 +393,7 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
 
     return (
       <div className="processing panel">
+        <FlowSteps phase="processing" />
         <div className="section-head">
           <div>
             <h2 className="section-title">
@@ -425,25 +449,24 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
 
   return (
     <form onSubmit={save}>
+      <FlowSteps phase="review" />
       <div className="review-grid">
         <aside className="review-media">
           {image ? (
             <div className="review-preview">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={image.dataUrl} alt="Screenshot คูปองที่อัปโหลด" />
+              <div className="review-preview-actions">
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setCropping(true)}
+                  disabled={saving}
+                >
+                  ครอปรูป
+                </button>
+              </div>
             </div>
-          ) : null}
-
-          {image ? (
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm btn-block"
-              onClick={() => setCropping(true)}
-              disabled={saving}
-              style={{ marginTop: 8 }}
-            >
-              ครอปรูป
-            </button>
           ) : null}
 
           <div className="review-meta">
@@ -464,7 +487,9 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
           </div>
 
           {form.description.trim() ? (
-            <div className={`lang-box lang-${language.level}`}>
+            <details className="ocr-details">
+              <summary>ตรวจคุณภาพภาษา · {language.score}%</summary>
+              <div className={`lang-box lang-${language.level}`}>
               <div className="lang-head">
                 <span className="lang-score">ภาษา {language.score}%</span>
                 <span className="lang-label">{language.label}</span>
@@ -484,7 +509,8 @@ export function AddCouponFlow({ existing, userId }: { existing: ExistingCoupon[]
               {language.notes.includes('OCR confidence ต่ำ') ? (
                 <p className="lang-note">OCR confidence ต่ำ — ควรตรวจข้อความ</p>
               ) : null}
-            </div>
+              </div>
+            </details>
           ) : null}
 
           {meta.qr ? (
