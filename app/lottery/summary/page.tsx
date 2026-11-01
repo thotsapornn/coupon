@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { CopyButton } from '@/components/CopyButton';
 import { formatMoney } from '@/lib/lottery';
+import { decodeShareJson } from '@/lib/share-codec';
 
 export const metadata = {
   title: 'สรุปตัวเลข',
@@ -9,6 +10,7 @@ export const metadata = {
 
 type PageProps = {
   searchParams: Promise<{
+    data?: string | string[];
     date?: string | string[];
     text?: string | string[];
     total?: string | string[];
@@ -21,13 +23,51 @@ const SUMMARY_LINE = /^\d{2,3} = \d+(?:\.\d+)?x\d+(?:\.\d+)?$/;
 const DRAW_DATE = /^\d{1,2} [ก-๙]+ \d{4}$/;
 const AMOUNT = /^\d+(?:\.\d+)?$/;
 
+function firstParam(value?: string | string[]): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function parsePayload(value?: string): Record<string, unknown> | null {
+  if (!value) return null;
+  const candidates = [value];
+  try {
+    const decoded = decodeURIComponent(value);
+    if (decoded !== value) candidates.push(decoded);
+  } catch {
+    // Try the raw value if it was not percent-encoded.
+  }
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate) as unknown;
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed as Record<string, unknown>;
+      }
+    } catch {
+      // Try the next encoding candidate.
+    }
+  }
+  return null;
+}
+
+function stringValue(value: unknown): string | undefined {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  return undefined;
+}
+
 export default async function SharedLotterySummaryPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const rawDate = Array.isArray(params.date) ? params.date[0] : params.date;
-  const rawText = Array.isArray(params.text) ? params.text[0] : params.text;
-  const rawTotal = Array.isArray(params.total) ? params.total[0] : params.total;
-  const rawBefore = Array.isArray(params.before) ? params.before[0] : params.before;
-  const rawDiscount = Array.isArray(params.discount) ? params.discount[0] : params.discount;
+  const rawPayload = firstParam(params.data);
+  const decodedPayload = decodeShareJson(rawPayload ?? '');
+  const payload =
+    decodedPayload && typeof decodedPayload === 'object' && !Array.isArray(decodedPayload)
+      ? (decodedPayload as Record<string, unknown>)
+      : parsePayload(rawPayload);
+  const rawDate = stringValue(payload?.date) ?? firstParam(params.date);
+  const rawText = stringValue(payload?.text) ?? firstParam(params.text);
+  const rawTotal = stringValue(payload?.total) ?? firstParam(params.total);
+  const rawBefore = stringValue(payload?.before) ?? firstParam(params.before);
+  const rawDiscount = stringValue(payload?.discount) ?? firstParam(params.discount);
   if (
     !rawDate ||
     !DRAW_DATE.test(rawDate) ||
@@ -47,8 +87,8 @@ export default async function SharedLotterySummaryPage({ searchParams }: PagePro
 
   const summaryText = lines.join('\n');
   const lineTotal = lines.reduce((sum, line) => {
-    const amount = line.match(/= (\d+(?:\.\d+)?)x/);
-    return sum + Number(amount?.[1] ?? 0);
+    const amounts = line.match(/= (\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)/);
+    return sum + Number(amounts?.[1] ?? 0) + Number(amounts?.[2] ?? 0);
   }, 0);
   const total = formatMoney(rawTotal ? Number(rawTotal) : lineTotal);
   const before = rawBefore ? formatMoney(Number(rawBefore)) : null;

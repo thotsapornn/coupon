@@ -3,7 +3,8 @@
 import { createContext, useCallback, useContext, useState } from 'react';
 
 export type ShareMode = 'full' | 'summary';
-type ShareHandler = (mode: ShareMode) => void | Promise<void>;
+export type ShareMethod = 'line' | 'copy';
+type ShareHandler = (mode: ShareMode, method: ShareMethod) => void | Promise<void>;
 
 type ShareRegistration = {
   handler: ShareHandler | null;
@@ -15,7 +16,7 @@ type LotteryShareContextValue = {
     handler: ShareHandler | null,
     disabled?: Record<ShareMode, boolean>,
   ) => void;
-  requestShare: (mode: ShareMode) => void | Promise<void>;
+  requestShare: (mode: ShareMode, method: ShareMethod) => void | Promise<void>;
   hasShare: boolean;
   isDisabled: (mode: ShareMode) => boolean;
 };
@@ -36,7 +37,7 @@ export function LotteryShareProvider({ children }: { children: React.ReactNode }
   );
 
   const requestShare = useCallback(
-    (mode: ShareMode) => registration.handler?.(mode),
+    (mode: ShareMode, method: ShareMethod) => registration.handler?.(mode, method),
     [registration.handler],
   );
   const isDisabled = useCallback(

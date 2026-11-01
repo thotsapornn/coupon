@@ -2,14 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShareIcon, SparklesIcon, TicketIcon } from './Icons';
+import { SparklesIcon, TicketIcon } from './Icons';
 import { BrandLink } from './BrandLink';
+import { LotteryShareMenu } from './LotteryShareMenu';
 import { useLotteryShare } from './LotteryShareContext';
 
 export function SiteHeader() {
   const pathname = usePathname() ?? '';
   const isLotteryPath = pathname === '/lottery' || pathname.startsWith('/lottery/');
-  const { hasShare, isDisabled, requestShare } = useLotteryShare();
+  const { hasShare } = useLotteryShare();
 
   return (
     <header className="site-header">
@@ -27,14 +28,7 @@ export function SiteHeader() {
             </Link>
             {pathname === '/lottery' && hasShare ? (
               <div className="header-actions">
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  onClick={() => void requestShare('full')}
-                  disabled={isDisabled('full')}
-                >
-                  <ShareIcon size={15} /> แชร์ทั้งหน้า
-                </button>
+                <LotteryShareMenu mode="full" label="แชร์ทั้งหน้า" />
               </div>
             ) : null}
           </>
@@ -42,10 +36,6 @@ export function SiteHeader() {
           <>
             <BrandLink />
             <div className="header-actions">
-              <Link href="/lottery" className="btn btn-secondary btn-sm">
-                <TicketIcon size={15} />
-                หวย
-              </Link>
               <Link href="/qr" className="btn btn-primary btn-sm">
                 <SparklesIcon size={15} />
                 สร้าง

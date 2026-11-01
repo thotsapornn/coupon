@@ -2,6 +2,8 @@
 /* Lottery number helper                                                */
 /* ------------------------------------------------------------------ */
 
+import { decodeShareJson, encodeShareJson } from './share-codec';
+
 export type LotteryDigits = 2 | 3;
 
 export const DEFAULT_LOTTERY_PRICE = '30';
@@ -37,7 +39,7 @@ export interface ParsedRestricted {
 export interface LotteryEntry {
   id: string;
   number: string;
-  /** ราคาที่กรอก (ตัวเลขเดี่ยว) — แสดงผลเป็น 30x30 */
+  /** ราคาแต่ละฝั่งที่กรอก (ตัวเลขเดี่ยว) — แสดงผลเป็น 30x30 */
   price: number;
   reverse: boolean;
 }
@@ -127,8 +129,8 @@ export function normalizeLotteryNumber(value: string): string | null {
 }
 
 /**
- * ราคาที่กรอกเป็นตัวเลขเดี่ยว เช่น 30 หรือ 30.5
- * (ตอนแสดงผลจะแปลงเป็น 30x30)
+ * ราคาที่กรอกเป็นตัวเลขต่อฝั่ง เช่น 30 หรือ 30.5
+ * (ตอนแสดงผลจะแปลงเป็น 30x30 และยอดรวมคิดทั้งบนกับล่าง)
  */
 export function normalizePrice(value: string): number | null {
   const cleaned = value.replace(/[\s,]/g, '');
@@ -142,7 +144,7 @@ function formatPriceNumber(value: number): string {
   return value.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
 }
 
-/** แสดงราคาเป็นรูปแบบ 30x30 จากตัวเลขเดี่ยว 30 */
+/** แสดงราคาบนและล่างจากราคาต่อฝั่ง เช่น 30 → 30x30 */
 export function formatEntryPrice(price: number): string {
   const value = formatPriceNumber(price);
   return `${value}x${value}`;
@@ -243,9 +245,9 @@ function parseSharedState(value: string): SharedLotteryState | null {
   }
 }
 
-/** เข้ารหัส JSON สำหรับใส่ query param */
+/** เข้ารหัส JSON แบบ Base64 URL-safe สำหรับใส่ query param */
 export function encodeLotteryShare(state: SharedLotteryState): string {
-  return encodeURIComponent(JSON.stringify(state));
+  return encodeShareJson(state);
 }
 
 /** รองรับทั้งค่าที่ถูก decode แล้ว (จาก searchParams) และค่าที่ encode อยู่ */
@@ -253,6 +255,10 @@ export function decodeLotteryShare(value?: string | null): SharedLotteryState | 
   if (!value || value.length > MAX_SHARE_LENGTH) return null;
 
   const candidates = [value];
+  const base64Json = decodeShareJson(value);
+  if (base64Json && typeof base64Json === 'object') {
+    candidates.push(JSON.stringify(base64Json));
+  }
   try {
     const decoded = decodeURIComponent(value);
     if (decoded !== value) candidates.push(decoded);
@@ -478,7 +484,7 @@ export function buildLotterySummary(
         ]
       : [entry.number];
     for (const number of numbers) {
-      totalAmount += entry.price;
+      totalAmount += entry.price * 2;
       lines.push({
         number,
         price: formatEntryPrice(entry.price),

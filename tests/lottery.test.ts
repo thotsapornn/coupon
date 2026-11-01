@@ -210,8 +210,8 @@ describe('lottery summary', () => {
 
     expect(summary.lines.map((line) => line.number)).toEqual(['123', '23', '32']);
     expect(summaryToText(summary.lines)).toBe('123 = 30x30\n23 = 30x30\n32 = 30x30');
-    expect(summary.totalAmount).toBe(90);
-    expect(summary.discountedAmount).toBe(90);
+    expect(summary.totalAmount).toBe(180);
+    expect(summary.discountedAmount).toBe(180);
     expect(summary.restrictedCount).toBe(0);
   });
 
@@ -247,10 +247,10 @@ describe('lottery summary', () => {
 
     expect(summary.lines[0].price).toBe('30x30');
     expect(summaryToText(summary.lines)).toBe('123 = 30x30');
-    expect(summary.totalAmount).toBe(30);
-    expect(summary.discountedAmount).toBe(22.5);
+    expect(summary.totalAmount).toBe(60);
+    expect(summary.discountedAmount).toBe(45);
     expect(lotterySummaryToText(summary, { discount: 25 })).toBe(
-      '123 = 30x30\nรวมราคา: 30 บาท\nส่วนลด 25%: -7.5 บาท\nยอดสุทธิ: 22.5 บาท',
+      '123 = 30x30\nรวมราคา: 60 บาท\nส่วนลด 25%: -15 บาท\nยอดสุทธิ: 45 บาท',
     );
   });
 
@@ -258,11 +258,11 @@ describe('lottery summary', () => {
     const entries = [entry({ number: '123', price: 30 }), entry({ number: '45', price: 50 })];
     const summary = buildLotterySummary(entries, parsed, { discount: 25 });
 
-    expect(summary.totalAmount).toBe(80);
-    expect(summary.discountedAmount).toBe(60);
+    expect(summary.totalAmount).toBe(160);
+    expect(summary.discountedAmount).toBe(120);
     expect(summary.lines.map((line) => line.price)).toEqual(['30x30', '50x50']);
     expect(lotterySummaryToText(summary, { discount: 25 })).toContain(
-      'ยอดสุทธิ: 60 บาท',
+      'ยอดสุทธิ: 120 บาท',
     );
   });
 
@@ -271,7 +271,7 @@ describe('lottery summary', () => {
     const summary = buildLotterySummary(entries, parsed);
 
     expect(summary.lines.map((line) => line.number)).toEqual(['20', '02']);
-    expect(summary.totalAmount).toBe(60);
+    expect(summary.totalAmount).toBe(120);
   });
 
   it('expands a reversed 3-digit entry into six lines', () => {
@@ -286,6 +286,7 @@ describe('lottery summary', () => {
       '312',
       '321',
     ]);
+    expect(summary.totalAmount).toBe(360);
   });
 });
 

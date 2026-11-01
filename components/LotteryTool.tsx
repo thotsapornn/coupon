@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { copyText } from '@/lib/clipboard';
 import { prepareImage, type PreparedImage } from '@/lib/image';
+import { encodeShareJson } from '@/lib/share-codec';
 import {
   buildLotterySummary,
   DEFAULT_LOTTERY_PRICE,
@@ -30,13 +31,13 @@ import {
 } from '@/lib/lottery-history';
 import { CopyButton } from './CopyButton';
 import { LotteryHistoryStats } from './LotteryHistoryStats';
-import { useLotteryShare, type ShareMode } from './LotteryShareContext';
+import { LotteryShareMenu } from './LotteryShareMenu';
+import { useLotteryShare, type ShareMethod, type ShareMode } from './LotteryShareContext';
 import {
   AlertIcon,
   CheckIcon,
   PencilIcon,
   PlusIcon,
-  ShareIcon,
   TicketIcon,
   TrashIcon,
   XIcon,
@@ -204,37 +205,35 @@ export function LotteryTool({ initialData }: { initialData?: SharedLotteryState 
     [restrictedText, priceInput, discount, entries, numberInput, reverseInput, historyRound, editingId],
   );
   const sharePayload = useMemo(() => encodeLotteryShare(shareState), [shareState]);
-  const fullShareTooLong = sharePayload.length > 7800;
+  const fullShareData = useMemo(() => encodeURIComponent(sharePayload), [sharePayload]);
+  const fullShareTooLong = fullShareData.length > 7800;
   const summaryShareDate = useMemo(
     () => lotteryRoundDateLabel(historyRound),
     [historyRound],
   );
-  const summaryShareDateQuery = useMemo(
-    () => encodeURIComponent(summaryShareDate),
-    [summaryShareDate],
-  );
-  const summaryShareTextQuery = useMemo(
-    () => encodeURIComponent(summaryText),
-    [summaryText],
-  );
-  const summaryShareAmountQuery = useMemo(
+  const summarySharePayload = useMemo(
     () =>
-      `total=${formatMoney(summary.discountedAmount)}${
-        discount > 0
-          ? `&before=${formatMoney(summary.totalAmount)}&discount=${discount}`
-          : ''
-      }`,
-    [summary.discountedAmount, summary.totalAmount, discount],
+      encodeShareJson({
+        date: summaryShareDate,
+        text: summaryText,
+        total: formatMoney(summary.discountedAmount),
+        ...(discount > 0
+          ? { before: formatMoney(summary.totalAmount), discount }
+          : {}),
+      }),
+    [summaryShareDate, summaryText, summary.discountedAmount, summary.totalAmount, discount],
   );
-  const summaryShareTooLong =
-    summaryShareDateQuery.length + summaryShareTextQuery.length + summaryShareAmountQuery.length >
-    7800;
+  const summaryShareData = useMemo(
+    () => encodeURIComponent(summarySharePayload),
+    [summarySharePayload],
+  );
+  const summaryShareTooLong = summaryShareData.length > 7800;
   const historyRoundKey = useMemo(
     () => lotteryRoundKeyForDate(historyRound),
     [historyRound],
   );
 
-  const share = useCallback(async (mode: ShareMode) => {
+  const share = useCallback(async (mode: ShareMode, method: ShareMethod) => {
     const tooLong = mode === 'full' ? fullShareTooLong : summaryShareTooLong;
     if (tooLong) {
       setShareStatus('ลิงก์ยาวเกินไป — ลดจำนวนเลขก่อนแชร์');
@@ -243,36 +242,29 @@ export function LotteryTool({ initialData }: { initialData?: SharedLotteryState 
 
     const url =
       mode === 'full'
-        ? `${window.location.origin}/lottery?data=${sharePayload}`
-        : `${window.location.origin}/lottery/summary?date=${summaryShareDateQuery}&text=${summaryShareTextQuery}&${summaryShareAmountQuery}`;
-    if (typeof navigator.share === 'function') {
-      try {
-        await navigator.share({
-          title:
-            mode === 'full'
-              ? `จัดโพยหวยงวด ${summaryShareDate}`
-              : `สรุปงวด ${summaryShareDate}`,
-          url,
-        });
-        setShareStatus(mode === 'full' ? 'แชร์ทั้งหน้าแล้ว' : 'แชร์สรุปแล้ว');
-        return;
-      } catch (error) {
-        if ((error as Error).name === 'AbortError') return;
-      }
+        ? `${window.location.origin}/lottery?data=${fullShareData}`
+        : `${window.location.origin}/lottery/summary?data=${summaryShareData}`;
+    if (method === 'copy') {
+      await copyText(url);
+      setShareStatus(mode === 'full' ? 'คัดลอกลิงก์ทั้งหน้าแล้ว' : 'คัดลอกลิงก์สรุปแล้ว');
+      return;
+    }
+
+    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(url)}`;
+    const popup = window.open(lineUrl, '_blank');
+    if (popup) {
+      popup.opener = null;
+      setShareStatus(mode === 'full' ? 'เปิด LINE เพื่อแชร์ทั้งหน้าแล้ว' : 'เปิด LINE เพื่อแชร์สรุปแล้ว');
+      return;
     }
 
     await copyText(url);
-    setShareStatus(
-      mode === 'full' ? 'คัดลอกลิงก์โพยพร้อมข้อมูลแล้ว' : 'คัดลอกลิงก์สรุปแล้ว',
-    );
+    setShareStatus('คัดลอกลิงก์แล้ว — เปิด LINE แล้ววางเพื่อแชร์');
   }, [
     fullShareTooLong,
     summaryShareTooLong,
-    sharePayload,
-    summaryShareDate,
-    summaryShareDateQuery,
-    summaryShareTextQuery,
-    summaryShareAmountQuery,
+    fullShareData,
+    summaryShareData,
   ]);
 
   useEffect(() => {
@@ -628,8 +620,8 @@ export function LotteryTool({ initialData }: { initialData?: SharedLotteryState 
         </div>
 
         <p className="lottery-form-hint">
-          กรอกเลขแล้วกด + · ราคา <span className="mono">30</span> จะสรุปเป็น{' '}
-          <span className="mono">30x30</span>
+          กรอกเลขแล้วกด + · ราคา 30 คือบน 30 + ล่าง 30
+          {' · สรุปเป็น '}<span className="mono">30x30</span>
         </p>
 
         <form className="lottery-table-form" ref={formRef} onSubmit={submit}>
@@ -835,14 +827,7 @@ export function LotteryTool({ initialData }: { initialData?: SharedLotteryState 
             </p>
           </div>
           {summary.lines.length > 0 ? (
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => void share('summary')}
-              disabled={summaryShareTooLong}
-            >
-              <ShareIcon size={14} /> แชร์สรุป
-            </button>
+            <LotteryShareMenu mode="summary" label="แชร์สรุป" />
           ) : null}
         </div>
 
