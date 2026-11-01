@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { SiteHeader } from '@/components/SiteChrome';
+import { LotteryShareProvider } from '@/components/LotteryShareContext';
 
 export const metadata: Metadata = {
   title: {
@@ -22,8 +23,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="th">
       <body>
-        <SiteHeader />
-        <main>{children}</main>
+        <LotteryShareProvider>
+          <SiteHeader />
+          <main>{children}</main>
+        </LotteryShareProvider>
       </body>
     </html>
   );

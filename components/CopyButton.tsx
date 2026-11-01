@@ -9,11 +9,13 @@ export function CopyButton({
   label = 'คัดลอก',
   className = 'btn btn-secondary btn-sm',
   copiedLabel = 'คัดลอกแล้ว',
+  iconOnly = false,
 }: {
   value: string;
   label?: string;
   className?: string;
   copiedLabel?: string;
+  iconOnly?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -24,9 +26,16 @@ export function CopyButton({
   }
 
   return (
-    <button type="button" className={className} onClick={copy} aria-live="polite">
+    <button
+      type="button"
+      className={className}
+      onClick={copy}
+      aria-label={copied ? copiedLabel : label}
+      title={copied ? copiedLabel : label}
+      aria-live="polite"
+    >
       {copied ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
-      {copied ? copiedLabel : label}
+      {iconOnly ? null : copied ? copiedLabel : label}
     </button>
   );
 }
