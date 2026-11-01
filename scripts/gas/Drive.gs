@@ -71,6 +71,76 @@ function uploadImage(couponId, base64, mimeType) {
   };
 }
 
+/* ------------------------------------------------------------------ */
+/* Share links (JSON เก็บใน Drive, ลิงก์สั้นใช้ key)                    */
+/* ------------------------------------------------------------------ */
+
+var SHARE_FOLDER_NAME = 'Shares';
+var SHARE_KEY_LENGTH = 12;
+var SHARE_KEY_PATTERN = /^[a-f0-9]{12}$/;
+var SHARE_FILE_SUFFIX = '.json';
+var MAX_SHARE_CHARS = 120000;
+
+function getShareFolder() {
+  return getOrCreateSubfolder(getRootFolder(), SHARE_FOLDER_NAME);
+}
+
+/** สุ่ม key จาก UUID และกันชนกับไฟล์ที่มีอยู่ */
+function generateShareKey(folder) {
+  for (var attempt = 0; attempt < 20; attempt += 1) {
+    var source = String(Utilities.getUuid()).replace(/-/g, '').toLowerCase();
+    var key = source.slice(0, SHARE_KEY_LENGTH);
+    if (!SHARE_KEY_PATTERN.test(key)) continue;
+    if (!folder.getFilesByName(key + SHARE_FILE_SUFFIX).hasNext()) return key;
+  }
+  throw appError('INTERNAL_ERROR', 'สร้างรหัสลิงก์ไม่สำเร็จ กรุณาลองใหม่');
+}
+
+function saveShareFile(kind, data) {
+  if (kind !== 'full' && kind !== 'summary') {
+    throw appError('VALIDATION_ERROR', 'ชนิดลิงก์แชร์ไม่ถูกต้อง');
+  }
+  var text = typeof data === 'string' ? data : '';
+  if (!text) throw appError('VALIDATION_ERROR', 'ไม่พบข้อมูลที่ต้องการแชร์');
+  if (text.length > MAX_SHARE_CHARS) {
+    throw appError('VALIDATION_ERROR', 'ข้อมูลแชร์ยาวเกินไป (เกิน ' + MAX_SHARE_CHARS + ' ตัวอักษร)');
+  }
+  if (!/^[A-Za-z0-9+/_=-]+$/.test(text)) {
+    throw appError('VALIDATION_ERROR', 'ข้อมูลแชร์ไม่ถูกต้อง');
+  }
+
+  var folder = getShareFolder();
+  var key = generateShareKey(folder);
+  var record = { kind: kind, data: text, createdAt: nowIso() };
+  var blob = Utilities.newBlob(
+    JSON.stringify(record),
+    'application/json',
+    key + SHARE_FILE_SUFFIX
+  );
+  folder.createFile(blob);
+
+  return { key: key, kind: kind, createdAt: record.createdAt };
+}
+
+function readShareFile(key) {
+  var normalized = typeof key === 'string' ? key.trim().toLowerCase() : '';
+  if (!SHARE_KEY_PATTERN.test(normalized)) {
+    throw appError('VALIDATION_ERROR', 'รหัสลิงก์ไม่ถูกต้อง');
+  }
+
+  var files = getShareFolder().getFilesByName(normalized + SHARE_FILE_SUFFIX);
+  if (!files.hasNext()) throw appError('NOT_FOUND', 'ไม่พบลิงก์แชร์นี้');
+
+  var text = files.next().getBlob().getDataAsString('UTF-8');
+  var record = JSON.parse(text);
+  return {
+    key: normalized,
+    kind: record.kind,
+    data: record.data,
+    createdAt: record.createdAt,
+  };
+}
+
 function trashFile(fileId) {
   try {
     DriveApp.getFileById(fileId).setTrashed(true);

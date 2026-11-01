@@ -1,7 +1,17 @@
 import { revalidateTag, unstable_cache } from 'next/cache';
+import { ApiError } from '../errors';
 import * as demo from './demo';
 import * as gas from './gas';
-import type { Coupon, CouponImageInput, CouponInput, ListCouponsOptions, ListResult, UsageLog } from '../types';
+import type {
+  Coupon,
+  CouponImageInput,
+  CouponInput,
+  ListCouponsOptions,
+  ListResult,
+  ShareKind,
+  ShareRecord,
+  UsageLog,
+} from '../types';
 
 export type StoreMode = 'demo' | 'gas';
 
@@ -159,4 +169,21 @@ export function isDemoMode(): boolean {
 export async function readImage(filename: string) {
   if (!isDemoMode()) return null;
   return demo.readDemoImage(filename);
+}
+
+/* ------------------------------------------------------------------ */
+/* ลิงก์แชร์แบบสั้น (payload เก็บใน Drive / .data)                      */
+/* ------------------------------------------------------------------ */
+
+export async function createShare(kind: ShareKind, data: string): Promise<ShareRecord> {
+  return await (storeMode() === 'gas' ? gas.createShare(kind, data) : demo.createShare(kind, data));
+}
+
+export async function getShare(key: string): Promise<ShareRecord | null> {
+  try {
+    return await (storeMode() === 'gas' ? gas.getShare(key) : demo.getShare(key));
+  } catch (error) {
+    if (error instanceof ApiError && error.code === 'NOT_FOUND') return null;
+    throw error;
+  }
 }

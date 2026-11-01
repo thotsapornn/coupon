@@ -5,6 +5,8 @@ import type {
   CouponInput,
   ListCouponsOptions,
   ListResult,
+  ShareKind,
+  ShareRecord,
   UsageLog,
 } from '../types';
 
@@ -186,4 +188,13 @@ export async function getStats(userId: string): Promise<{
     expired: number;
   }>('getStats', { userId });
   return data;
+}
+
+/** เก็บ payload ของลิงก์แชร์ใน Drive แล้วคืน key สั้น ๆ */
+export async function createShare(kind: ShareKind, data: string): Promise<ShareRecord> {
+  return call<ShareRecord>('createShare', { kind, data });
+}
+
+export async function getShare(key: string): Promise<ShareRecord> {
+  return call<ShareRecord>('getShare', { key });
 }

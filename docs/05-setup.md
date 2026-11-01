@@ -82,6 +82,8 @@ npm start          # http://localhost:3000
 6. กด **Deploy** → อนุญาตสิทธิ์ (ครั้งแรกจะมีหน้า consent ให้กด Advanced → Go to project)
 7. คัดลอก **Web app URL** ที่ลงท้ายด้วย `/exec`
 
+> **อัปเดตโค้ด Apps Script ภายหลัง:** วางไฟล์ใหม่ทั้ง 4 แล้วไปที่ **Deploy → Manage deployments → เลือก deployment → Edit → Version: New version → Deploy** (URL `/exec` เดิมไม่เปลี่ยน) — ถ้าไม่สร้าง version ใหม่ เว็บจะยังเรียกโค้ดเก่าและ action ใหม่อย่าง `createShare`/`getShare` จะตอบ `VALIDATION_ERROR`
+
 **ทดสอบเร็ว ๆ ด้วย curl:**
 
 ```bash

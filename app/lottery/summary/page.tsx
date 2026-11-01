@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation';
 import { CopyButton } from '@/components/CopyButton';
-import { formatMoney } from '@/lib/lottery';
+import { formatMoney, MAX_SHARE_CHARS } from '@/lib/lottery';
 import { decodeShareJson } from '@/lib/share-codec';
+import { getShare } from '@/lib/store';
 
 export const metadata = {
   title: 'สรุปตัวเลข',
@@ -11,6 +12,7 @@ export const metadata = {
 type PageProps = {
   searchParams: Promise<{
     data?: string | string[];
+    s?: string | string[];
     date?: string | string[];
     text?: string | string[];
     total?: string | string[];
@@ -57,7 +59,15 @@ function stringValue(value: unknown): string | undefined {
 
 export default async function SharedLotterySummaryPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const rawPayload = firstParam(params.data);
+  const shareKey = firstParam(params.s)?.trim().toLowerCase();
+  let rawPayload = firstParam(params.data);
+
+  if (shareKey) {
+    const share = await getShare(shareKey);
+    if (!share || share.kind !== 'summary') notFound();
+    rawPayload = share.data;
+  }
+
   const decodedPayload = decodeShareJson(rawPayload ?? '');
   const payload =
     decodedPayload && typeof decodedPayload === 'object' && !Array.isArray(decodedPayload)
@@ -72,7 +82,7 @@ export default async function SharedLotterySummaryPage({ searchParams }: PagePro
     !rawDate ||
     !DRAW_DATE.test(rawDate) ||
     !rawText ||
-    rawText.length > 7800 ||
+    rawText.length > MAX_SHARE_CHARS ||
     (rawTotal && !AMOUNT.test(rawTotal)) ||
     (rawBefore && !AMOUNT.test(rawBefore)) ||
     (rawDiscount && rawDiscount !== '25')

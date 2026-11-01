@@ -114,3 +114,14 @@ export interface QrScanResult {
   engine: 'jsqr' | 'zxing';
   ms: number;
 }
+
+export type ShareKind = 'full' | 'summary';
+
+/** ลิงก์แชร์แบบสั้น: เก็บ payload ใน Drive แล้วอ้างด้วย key */
+export interface ShareRecord {
+  key: string;
+  kind: ShareKind;
+  data: string;
+  createdAt: string;
+}
+

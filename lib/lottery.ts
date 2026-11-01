@@ -189,7 +189,7 @@ export interface SharedLotteryState {
   editingId?: string;
 }
 
-const MAX_SHARE_LENGTH = 20_000;
+export const MAX_SHARE_CHARS = 120_000;
 const MAX_SHARED_ENTRIES = 500;
 
 function parseSharedState(value: string): SharedLotteryState | null {
@@ -199,7 +199,7 @@ function parseSharedState(value: string): SharedLotteryState | null {
 
     const restrictedText =
       typeof parsed.restrictedText === 'string'
-        ? parsed.restrictedText.slice(0, MAX_SHARE_LENGTH)
+        ? parsed.restrictedText.slice(0, MAX_SHARE_CHARS)
         : '';
     const useRestricted =
       typeof parsed.useRestricted === 'boolean' ? parsed.useRestricted : true;
@@ -252,7 +252,7 @@ export function encodeLotteryShare(state: SharedLotteryState): string {
 
 /** รองรับทั้งค่าที่ถูก decode แล้ว (จาก searchParams) และค่าที่ encode อยู่ */
 export function decodeLotteryShare(value?: string | null): SharedLotteryState | null {
-  if (!value || value.length > MAX_SHARE_LENGTH) return null;
+  if (!value || value.length > MAX_SHARE_CHARS) return null;
 
   const candidates = [value];
   const base64Json = decodeShareJson(value);

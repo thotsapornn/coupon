@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MAX_SHARE_CHARS } from './lottery';
 import { validationError } from './errors';
 
 const optionalText = (max: number, label: string) =>
@@ -66,9 +67,19 @@ export const updateCouponSchema = couponWriteSchema.partial().refine(
   'ไม่มีข้อมูลที่ต้องการแก้ไข',
 );
 
+export const shareCreateSchema = z.object({
+  kind: z.enum(['full', 'summary'], { error: 'ชนิดลิงก์แชร์ไม่ถูกต้อง' }),
+  data: z
+    .string({ error: 'ไม่พบข้อมูลที่ต้องการแชร์' })
+    .min(1, 'ไม่พบข้อมูลที่ต้องการแชร์')
+    .max(MAX_SHARE_CHARS, 'ข้อมูลแชร์ยาวเกินไป')
+    .regex(/^[A-Za-z0-9+/_=-]+$/, 'ข้อมูลแชร์ไม่ถูกต้อง'),
+});
+
 export type CouponWriteValues = z.infer<typeof couponWriteSchema>;
 export type CreateCouponValues = z.infer<typeof createCouponSchema>;
 export type UpdateCouponValues = z.infer<typeof updateCouponSchema>;
+export type ShareCreateValues = z.infer<typeof shareCreateSchema>;
 
 export function parseWithSchema<T extends z.ZodType>(schema: T, data: unknown): z.infer<T> {
   const result = schema.safeParse(data);

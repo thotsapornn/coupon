@@ -104,12 +104,16 @@ class MockSpreadsheet {
 
 class MockFile {
   trashed = false;
+  content: string;
 
   constructor(
     public id: string,
     public name: string,
     public mimeType: string,
-  ) {}
+    bytes?: Uint8Array | string,
+  ) {
+    this.content = bytes === undefined ? '' : Buffer.from(bytes as string).toString('utf8');
+  }
 
   setSharing(): void {}
 
@@ -119,6 +123,11 @@ class MockFile {
 
   getId(): string {
     return this.id;
+  }
+
+  getBlob(): { getDataAsString: () => string } {
+    const content = this.content;
+    return { getDataAsString: () => content };
   }
 }
 
@@ -131,14 +140,28 @@ class MockFolder {
     public name: string,
   ) {}
 
-  createFile(blob: { bytes: Uint8Array; mimeType: string; name: string }): MockFile {
-    const file = new MockFile(`file-${this.files.length + 1}-${this.id}`, blob.name, blob.mimeType);
+  createFile(blob: { bytes: Uint8Array | string; mimeType: string; name: string }): MockFile {
+    const file = new MockFile(
+      `file-${this.files.length + 1}-${this.id}`,
+      blob.name,
+      blob.mimeType,
+      blob.bytes,
+    );
     this.files.push(file);
     return file;
   }
 
   getFoldersByName(name: string): { hasNext: () => boolean; next: () => MockFolder } {
     const matches = this.folders.filter((folder) => folder.name === name);
+    let index = 0;
+    return {
+      hasNext: () => index < matches.length,
+      next: () => matches[index++],
+    };
+  }
+
+  getFilesByName(name: string): { hasNext: () => boolean; next: () => MockFile } {
+    const matches = this.files.filter((file) => file.name === name && !file.trashed);
     let index = 0;
     return {
       hasNext: () => index < matches.length,
@@ -190,58 +213,28 @@ function buildGas() {
     return folder;
   };
 
+  const folderApi = (folder: MockFolder) => ({
+    getId: () => folder.id,
+    getFoldersByName: (folderName: string) => folder.getFoldersByName(folderName),
+    getFilesByName: (fileName: string) => folder.getFilesByName(fileName),
+    createFolder: (folderName: string) =>
+      folderApi(registerFolder(folder.createFolder(folderName))),
+    createFile: (blob: { bytes: Uint8Array | string; mimeType: string; name: string }) =>
+      registerFile(folder.createFile(blob)),
+  });
+
   const driveApp = {
     Access: { ANYONE_WITH_LINK: 'ANYONE_WITH_LINK' },
     Permission: { VIEW: 'VIEW' },
     createFolder(name: string) {
       const folder = registerFolder(new MockFolder(`root-${rootFolders.length + 1}`, name));
       rootFolders.push(folder);
-      return {
-        getId: () => folder.id,
-        getFoldersByName: (folderName: string) => folder.getFoldersByName(folderName),
-        createFolder: (folderName: string) => {
-          const created = registerFolder(folder.createFolder(folderName));
-          return {
-            getId: () => created.id,
-            getFoldersByName: (n: string) => created.getFoldersByName(n),
-            createFolder: (n: string) => {
-              const inner = registerFolder(created.createFolder(n));
-              return {
-                getId: () => inner.id,
-                createFile: (blob: { bytes: Uint8Array; mimeType: string; name: string }) =>
-                  registerFile(inner.createFile(blob)),
-              };
-            },
-            createFile: (blob: { bytes: Uint8Array; mimeType: string; name: string }) =>
-              registerFile(created.createFile(blob)),
-          };
-        },
-      };
+      return folderApi(folder);
     },
     getFolderById(id: string) {
       const folder = folderById.get(id);
       if (!folder) throw new Error('folder not found');
-      return {
-        getId: () => folder.id,
-        getFoldersByName: (n: string) => folder.getFoldersByName(n),
-        createFolder: (n: string) => {
-          const created = registerFolder(folder.createFolder(n));
-          return {
-            getId: () => created.id,
-            getFoldersByName: (name: string) => created.getFoldersByName(name),
-            createFolder: (name: string) => {
-              const inner = registerFolder(created.createFolder(name));
-              return {
-                getId: () => inner.id,
-                createFile: (blob: { bytes: Uint8Array; mimeType: string; name: string }) =>
-                  registerFile(inner.createFile(blob)),
-              };
-            },
-            createFile: (blob: { bytes: Uint8Array; mimeType: string; name: string }) =>
-              registerFile(created.createFile(blob)),
-          };
-        },
-      };
+      return folderApi(folder);
     },
     getFileById(id: string) {
       const file = filesById.get(id);
@@ -250,11 +243,18 @@ function buildGas() {
     },
   };
 
+  let uuidSequence = 0;
+
   const utilities = {
     formatDate,
     base64Decode: (value: string) => new Uint8Array(Buffer.from(value, 'base64')),
-    newBlob: (bytes: Uint8Array, mimeType: string, name: string) => ({ bytes, mimeType, name }),
-    getUuid: () => 'uuid-0000-0000',
+    newBlob: (bytes: Uint8Array | string, mimeType: string, name: string) => ({
+      bytes,
+      mimeType,
+      name,
+    }),
+    getUuid: () =>
+      `${(uuidSequence++).toString(16).padStart(8, '0')}-0000-4000-8000-000000000000`,
   };
 
   const contentService = {
@@ -646,5 +646,50 @@ describe('Apps Script web app', () => {
   it('returns NOT_FOUND for unknown coupons', () => {
     expect(gas.call('getCoupon', { couponId: 'CPN-NOPE' }).error?.code).toBe('NOT_FOUND');
     expect(gas.call('markUsed', { couponId: 'CPN-NOPE' }).error?.code).toBe('NOT_FOUND');
+  });
+
+  it('stores a shared payload in Drive and returns a short key', () => {
+    const data = Buffer.from(JSON.stringify({ hello: 'world' })).toString('base64');
+
+    const created = gas.call('createShare', { kind: 'full', data });
+    expect(created.ok).toBe(true);
+
+    const key = created.data!.key as string;
+    expect(key).toMatch(/^[a-f0-9]{12}$/);
+
+    const read = gas.call('getShare', { key });
+    expect(read.ok).toBe(true);
+    expect(read.data).toMatchObject({ key, kind: 'full', data });
+
+    // เก็บเป็นไฟล์ JSON ในโฟลเดอร์ Shares ของ Drive
+    expect(gas.filesById.size).toBe(1);
+    const file = [...gas.filesById.values()][0];
+    expect(file.name).toBe(`${key}.json`);
+    expect(JSON.parse(file.content)).toMatchObject({ kind: 'full', data });
+  });
+
+  it('keeps full and summary shares separate and rejects bad keys', () => {
+    const full = gas.call('createShare', {
+      kind: 'full',
+      data: Buffer.from('full-payload').toString('base64'),
+    });
+    const summary = gas.call('createShare', {
+      kind: 'summary',
+      data: Buffer.from('summary-payload').toString('base64'),
+    });
+
+    expect(full.ok).toBe(true);
+    expect(summary.ok).toBe(true);
+    expect(full.data!.key).not.toBe(summary.data!.key);
+    expect(gas.call('getShare', { key: summary.data!.key as string }).data!.kind).toBe('summary');
+
+    expect(gas.call('createShare', { kind: 'other', data: 'abc' }).error?.code).toBe(
+      'VALIDATION_ERROR',
+    );
+    expect(gas.call('createShare', { kind: 'full', data: '' }).error?.code).toBe(
+      'VALIDATION_ERROR',
+    );
+    expect(gas.call('getShare', { key: '../bad' }).error?.code).toBe('VALIDATION_ERROR');
+    expect(gas.call('getShare', { key: 'aaaaaaaaaaaa' }).error?.code).toBe('NOT_FOUND');
   });
 });

@@ -1,5 +1,6 @@
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
+import { randomUUID } from 'node:crypto';
 import { notFound, invalidState, validationError } from '../errors';
 import { normalizeUserId } from '../user';
 import { nowIso, todayBangkok } from '../format';
@@ -11,6 +12,8 @@ import type {
   CouponInput,
   ListCouponsOptions,
   ListResult,
+  ShareKind,
+  ShareRecord,
   UsageAction,
   UsageLog,
 } from '../types';
@@ -26,6 +29,8 @@ const DATA_DIR = process.env.CW_DATA_DIR
   : path.join(process.cwd(), '.data');
 const DB_PATH = path.join(DATA_DIR, 'db.json');
 const UPLOAD_DIR = path.join(DATA_DIR, 'uploads');
+const SHARE_DIR = path.join(DATA_DIR, 'shares');
+const SHARE_KEY_PATTERN = /^[a-f0-9]{12}$/;
 
 const TEXT_FIELDS = [
   'title',
@@ -716,5 +721,49 @@ export async function readDemoImage(filename: string): Promise<{ buffer: Buffer;
     return { buffer, mime };
   } catch {
     return null;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Share links (demo: เก็บ JSON ไว้ใน .data/shares)                     */
+/* ------------------------------------------------------------------ */
+
+export async function createShare(kind: ShareKind, data: string): Promise<ShareRecord> {
+  await fs.mkdir(SHARE_DIR, { recursive: true });
+  const createdAt = nowIso();
+  const record = { kind, data, createdAt };
+
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const key = randomUUID().replace(/-/g, '').slice(0, 12);
+    try {
+      await fs.writeFile(path.join(SHARE_DIR, `${key}.json`), JSON.stringify(record), {
+        encoding: 'utf8',
+        flag: 'wx',
+      });
+      return { key, ...record };
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
+    }
+  }
+
+  throw new Error('สร้างรหัสลิงก์แชร์ไม่สำเร็จ');
+}
+
+export async function getShare(key: string): Promise<ShareRecord | null> {
+  if (!SHARE_KEY_PATTERN.test(key)) return null;
+  try {
+    const raw = await fs.readFile(path.join(SHARE_DIR, `${key}.json`), 'utf8');
+    const parsed = JSON.parse(raw) as { kind?: unknown; data?: unknown; createdAt?: unknown };
+    if (
+      (parsed.kind !== 'full' && parsed.kind !== 'summary') ||
+      typeof parsed.data !== 'string' ||
+      typeof parsed.createdAt !== 'string'
+    ) {
+      return null;
+    }
+    return { key, kind: parsed.kind, data: parsed.data, createdAt: parsed.createdAt };
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+    throw error;
   }
 }

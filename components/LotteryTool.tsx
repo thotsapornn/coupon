@@ -12,6 +12,7 @@ import {
   formatMoney,
   isValidDiscount,
   isValidLotteryEntry,
+  MAX_SHARE_CHARS,
   matchesRestricted,
   normalizeDigits,
   normalizeLotteryNumber,
@@ -206,7 +207,7 @@ export function LotteryTool({ initialData }: { initialData?: SharedLotteryState 
   );
   const sharePayload = useMemo(() => encodeLotteryShare(shareState), [shareState]);
   const fullShareData = useMemo(() => encodeURIComponent(sharePayload), [sharePayload]);
-  const fullShareTooLong = fullShareData.length > 7800;
+  const fullShareTooLong = sharePayload.length > MAX_SHARE_CHARS;
   const summaryShareDate = useMemo(
     () => lotteryRoundDateLabel(historyRound),
     [historyRound],
@@ -227,26 +228,80 @@ export function LotteryTool({ initialData }: { initialData?: SharedLotteryState 
     () => encodeURIComponent(summarySharePayload),
     [summarySharePayload],
   );
-  const summaryShareTooLong = summaryShareData.length > 7800;
+  const summaryShareTooLong = summarySharePayload.length > MAX_SHARE_CHARS;
   const historyRoundKey = useMemo(
     () => lotteryRoundKeyForDate(historyRound),
     [historyRound],
   );
 
+  // เก็บ key ที่สร้างแล้วต่อ payload — กดแชร์ซ้ำไม่สร้างไฟล์ใหม่ใน Drive
+  const shareKeyCacheRef = useRef(new Map<string, string>());
+  const sharingRef = useRef(false);
+
   const share = useCallback(async (mode: ShareMode, method: ShareMethod) => {
+    if (sharingRef.current) return;
+
     const tooLong = mode === 'full' ? fullShareTooLong : summaryShareTooLong;
     if (tooLong) {
       setShareStatus('ลิงก์ยาวเกินไป — ลดจำนวนเลขก่อนแชร์');
       return;
     }
 
-    const url =
+    const payload = mode === 'full' ? sharePayload : summarySharePayload;
+    const cacheKey = `${mode}:${payload}`;
+    const longUrl =
       mode === 'full'
         ? `${window.location.origin}/lottery?data=${fullShareData}`
         : `${window.location.origin}/lottery/summary?data=${summaryShareData}`;
+
+    sharingRef.current = true;
+    setShareStatus('กำลังสร้างลิงก์แชร์…');
+
+    let url = longUrl;
+    let short = false;
+
+    try {
+      let key = shareKeyCacheRef.current.get(cacheKey);
+      if (!key) {
+        const response = await fetch('/api/lottery/share', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kind: mode, data: payload }),
+        });
+        const body = (await response.json().catch(() => null)) as {
+          ok?: boolean;
+          data?: { key?: string };
+        } | null;
+        if (!response.ok || !body?.ok || !body.data?.key) throw new Error('share failed');
+        key = body.data.key;
+        if (shareKeyCacheRef.current.size > 20) shareKeyCacheRef.current.clear();
+        shareKeyCacheRef.current.set(cacheKey, key);
+      }
+
+      url =
+        mode === 'full'
+          ? `${window.location.origin}/lottery?s=${key}`
+          : `${window.location.origin}/lottery/summary?s=${key}`;
+      short = true;
+    } catch {
+      const longUrlFits = (mode === 'full' ? fullShareData : summaryShareData).length <= 7800;
+      if (!longUrlFits) {
+        setShareStatus('สร้างลิงก์สั้นไม่สำเร็จ — ลองใหม่');
+        return;
+      }
+      setShareStatus('สร้างลิงก์สั้นไม่สำเร็จ — ใช้ลิงก์แบบยาวแทน');
+    } finally {
+      sharingRef.current = false;
+    }
+
+    const copiedMessage =
+      mode === 'full' ? 'คัดลอกลิงก์ทั้งหน้าแล้ว' : 'คัดลอกลิงก์สรุปแล้ว';
+    const openedMessage =
+      mode === 'full' ? 'เปิด LINE เพื่อแชร์ทั้งหน้าแล้ว' : 'เปิด LINE เพื่อแชร์สรุปแล้ว';
+
     if (method === 'copy') {
       await copyText(url);
-      setShareStatus(mode === 'full' ? 'คัดลอกลิงก์ทั้งหน้าแล้ว' : 'คัดลอกลิงก์สรุปแล้ว');
+      setShareStatus(short ? copiedMessage : `${copiedMessage} (แบบยาว)`);
       return;
     }
 
@@ -254,15 +309,19 @@ export function LotteryTool({ initialData }: { initialData?: SharedLotteryState 
     const popup = window.open(lineUrl, '_blank');
     if (popup) {
       popup.opener = null;
-      setShareStatus(mode === 'full' ? 'เปิด LINE เพื่อแชร์ทั้งหน้าแล้ว' : 'เปิด LINE เพื่อแชร์สรุปแล้ว');
+      setShareStatus(short ? openedMessage : `${openedMessage} (แบบยาว)`);
       return;
     }
 
     await copyText(url);
-    setShareStatus('คัดลอกลิงก์แล้ว — เปิด LINE แล้ววางเพื่อแชร์');
+    setShareStatus(
+      short ? 'คัดลอกลิงก์แล้ว — เปิด LINE แล้ววางเพื่อแชร์' : 'คัดลอกลิงก์แบบยาวแล้ว — เปิด LINE แล้ววางเพื่อแชร์',
+    );
   }, [
     fullShareTooLong,
     summaryShareTooLong,
+    sharePayload,
+    summarySharePayload,
     fullShareData,
     summaryShareData,
   ]);

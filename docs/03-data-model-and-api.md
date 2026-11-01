@@ -205,6 +205,8 @@ Browser ──(same-origin, JSON)──> Next.js Route Handlers ──(POST + to
 | `undoUsed` | `{couponId, userId}` | `{coupon}` | ต้องเป็นเจ้าของ; `status=used` |
 | `deleteCoupon` | `{couponId, userId}` | `{coupon}` | soft delete |
 | `listHistory` | `{couponId, userId}` | `{logs}` | เฉพาะเจ้าของ/แอดมิน |
+| `createShare` | `{kind: 'full'\|'summary', data}` | `{key, kind, createdAt}` | เก็บ payload (base64 JSON) เป็นไฟล์ `<key>.json` ใน Drive โฟลเดอร์ `CouponWallet/Shares`; key = hex 12 ตัว |
+| `getShare` | `{key}` | `{key, kind, data, createdAt}` | อ่านไฟล์แชร์ด้วย key; ไม่พบ → `NOT_FOUND` |
 
 ### 5.3 Next.js Routes (BFF)
 
@@ -219,6 +221,8 @@ Browser ──(same-origin, JSON)──> Next.js Route Handlers ──(POST + to
 | `POST` | `/api/coupons/:id/undo-use?userId=` | undo | `userId` |
 | `DELETE` | `/api/coupons/:id?userId=` | soft delete | `userId` |
 | `GET` | `/api/coupons/:id/history?userId=` | log | `userId` |
+| `POST` | `/api/lottery/share` | สร้างลิงก์แชร์หวยแบบสั้น (`{kind, data}` → `{key}`) | – |
+| `GET` | `/api/lottery/share?key=` | อ่าน payload ของลิงก์แชร์ (`{kind, data}`) | – |
 
 **ตัวอย่าง — สร้างคูปอง**
 
